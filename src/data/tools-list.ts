@@ -38,7 +38,7 @@ export const tools: readonly Tool[] = [
     categoryId: "text-and-data",
     icon: "text-lines",
     href: "/tools/word-counter",
-    available: false,
+    available: true,
   },
   {
     slug: "password-generator",
@@ -48,7 +48,7 @@ export const tools: readonly Tool[] = [
     categoryId: "text-and-data",
     icon: "lock",
     href: "/tools/password-generator",
-    available: false,
+    available: true,
   },
 
   // Images and Colors
@@ -101,7 +101,7 @@ export const tools: readonly Tool[] = [
     categoryId: "development-and-data",
     icon: "link",
     href: "/tools/url-shortener",
-    available: false,
+    available: true,
   },
   {
     slug: "cpf-cnpj-generator",

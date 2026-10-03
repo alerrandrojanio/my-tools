@@ -6,7 +6,7 @@ export function Footer() {
           © {new Date().getFullYear()} My Tools
         </p>
         <p className="text-sm text-muted">
-          Everything runs in your browser. Nothing is uploaded.
+          Most tools run entirely in your browser.
         </p>
       </div>
     </footer>
