@@ -55,6 +55,13 @@ const ICONS: Record<ToolIconName, ReactNode> = {
       <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
     </>
   ),
+  download: (
+    <>
+      <path d="M12 3v12" />
+      <path d="M7 11l5 5 5-5" />
+      <path d="M5 21h14" />
+    </>
+  ),
   "id-card": (
     <>
       <rect x="3" y="5" width="18" height="14" rx="2" />

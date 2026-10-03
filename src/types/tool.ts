@@ -12,7 +12,8 @@ export type ToolIconName =
   | "droplet"
   | "braces"
   | "link"
-  | "id-card";
+  | "id-card"
+  | "download";
 
 export interface ToolCategory {
   id: ToolCategoryId;

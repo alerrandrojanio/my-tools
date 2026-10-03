@@ -20,7 +20,7 @@ const INDENT_OPTIONS: readonly {
 ];
 
 const FIELD =
-  "min-h-[32rem] w-full resize-y rounded-xl border border-line-strong bg-canvas p-4 font-mono text-[14px] leading-relaxed text-ink placeholder:text-muted";
+  "min-h-[32rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 font-mono text-[14px] leading-relaxed text-ink placeholder:text-muted";
 
 const GHOST_BUTTON =
   "inline-flex min-h-11 items-center rounded-[10px] border border-line-strong px-4.5 text-[15px] font-semibold text-ink transition hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50";

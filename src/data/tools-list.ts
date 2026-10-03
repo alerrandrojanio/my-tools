@@ -31,6 +31,16 @@ export const tools: readonly Tool[] = [
     available: true,
   },
   {
+    slug: "base64-to-file",
+    name: "Base64 to File Converter",
+    description:
+      "Turn a Base64 string or data URI back into a downloadable file, with a preview.",
+    categoryId: "text-and-data",
+    icon: "download",
+    href: "/tools/base64-to-file",
+    available: true,
+  },
+  {
     slug: "word-counter",
     name: "Word Counter",
     description:

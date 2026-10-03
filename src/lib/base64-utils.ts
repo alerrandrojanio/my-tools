@@ -46,11 +46,15 @@ export function encodeBase64(
   };
 }
 
+export type BytesResult =
+  | { ok: true; value: Uint8Array }
+  | { ok: false; error: string };
+
 /**
- * Decodes a Base64 string into text. Accepts both the standard and URL-safe
- * alphabets, ignores whitespace and tolerates missing padding.
+ * Decodes a Base64 string into raw bytes. Accepts both the standard and
+ * URL-safe alphabets, ignores whitespace and tolerates missing padding.
  */
-export function decodeBase64(input: string): Base64Result {
+export function base64ToBytes(input: string): BytesResult {
   const normalized = input
     .replace(/\s+/g, "")
     .replace(/-/g, "+")
@@ -69,15 +73,20 @@ export function decodeBase64(input: string): Base64Result {
   }
 
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  return { ok: true, value: binaryStringToBytes(atob(padded)) };
+}
+
+/** Decodes a Base64 string into UTF-8 text. */
+export function decodeBase64(input: string): Base64Result {
+  const decoded = base64ToBytes(input);
+  if (!decoded.ok) return decoded;
 
   try {
-    const bytes = binaryStringToBytes(atob(padded));
-    const value = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    const value = new TextDecoder("utf-8", { fatal: true }).decode(
+      decoded.value,
+    );
     return { ok: true, value };
   } catch {
-    return {
-      ok: false,
-      error: "Decoded data is not valid UTF-8 text.",
-    };
+    return { ok: false, error: "Decoded data is not valid UTF-8 text." };
   }
 }

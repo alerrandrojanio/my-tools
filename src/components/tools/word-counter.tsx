@@ -39,7 +39,7 @@ export function WordCounter() {
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder="Type or paste your text here…"
-          className="min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas p-4 text-[16px] leading-relaxed text-ink placeholder:text-muted"
+          className="min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 text-[16px] leading-relaxed text-ink placeholder:text-muted"
         />
       </div>
 

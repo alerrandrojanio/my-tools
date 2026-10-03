@@ -15,7 +15,7 @@ const MODES: readonly { id: Mode; label: string }[] = [
 ];
 
 const FIELD =
-  "min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas p-4 font-mono text-[15px] leading-relaxed text-ink placeholder:text-muted";
+  "min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 font-mono text-[15px] leading-relaxed text-ink placeholder:text-muted";
 
 const BUTTON =
   "inline-flex min-h-11 items-center rounded-[10px] border border-line-strong px-4.5 text-[15px] font-semibold text-ink transition hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent";
