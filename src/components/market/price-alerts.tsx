@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import { type FormEvent, useCallback, useEffect, useRef, useState } from "react"
-import { useI18n } from "@/i18n/provider"
-import { useFormatters } from "@/i18n/use-formatters"
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useI18n } from "@/i18n/provider";
+import { useFormatters } from "@/i18n/use-formatters";
 import {
   describeDevice,
   type PriceAlert,
   urlBase64ToBytes,
-} from "@/lib/alert-utils"
-import type { Quote } from "@/lib/market-data"
+} from "@/lib/alert-utils";
+import type { Quote } from "@/lib/market-data";
 
 interface PriceAlertsProps {
-  quote: Quote
+  quote: Quote;
 }
 
 type Status =
@@ -20,25 +26,24 @@ type Status =
   | "blocked"
   | "off"
   | "on"
-  | "unconfigured"
+  | "unconfigured";
 
-type Kind = "below" | "above" | "reaches" | "rise" | "fall"
+type Kind = "below" | "above" | "reaches" | "rise" | "fall";
 
 const KINDS: readonly {
-  id: Kind
-  label: "kindBelow" | "kindAbove" | "kindReaches" | "kindRise" | "kindFall"
-  percent?: boolean
+  id: Kind;
+  label: "kindBelow" | "kindAbove" | "kindReaches" | "kindRise" | "kindFall";
+  percent?: boolean;
 }[] = [
   { id: "below", label: "kindBelow" },
   { id: "above", label: "kindAbove" },
   { id: "reaches", label: "kindReaches" },
   { id: "rise", label: "kindRise", percent: true },
   { id: "fall", label: "kindFall", percent: true },
-]
+];
 
-const DEVICE_KEY = "mytools.alerts.deviceId"
-const PUBLIC_KEY = process.env.NP_VAPID_PUBLIC_KEY ?? ""
-const SUBSCRIBE_TIMEOUT_MS = 20_000
+const DEVICE_KEY = "mytools.alerts.deviceId";
+const SUBSCRIBE_TIMEOUT_MS = 20_000;
 
 /** Some browsers never settle `subscribe()` (no push service); don't wait forever. */
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -47,50 +52,50 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       () =>
         reject(new Error("Timed out waiting for the browser push service.")),
       ms,
-    )
+    );
     promise.then(
       (value) => {
-        clearTimeout(timer)
-        resolve(value)
+        clearTimeout(timer);
+        resolve(value);
       },
       (error) => {
-        clearTimeout(timer)
-        reject(error)
+        clearTimeout(timer);
+        reject(error);
       },
-    )
-  })
+    );
+  });
 }
 
 function readStorage(key: string): string | null {
   try {
-    return localStorage.getItem(key)
+    return localStorage.getItem(key);
   } catch {
-    return null
+    return null;
   }
 }
 
 function writeStorage(key: string, value: string): void {
   try {
-    localStorage.setItem(key, value)
+    localStorage.setItem(key, value);
   } catch {
     // Storage can be blocked; the page still works for this session.
   }
 }
 
 function getDeviceId(): string {
-  const existing = readStorage(DEVICE_KEY)
-  if (existing) return existing
-  const created = crypto.randomUUID()
-  writeStorage(DEVICE_KEY, created)
-  return created
+  const existing = readStorage(DEVICE_KEY);
+  if (existing) return existing;
+  const created = crypto.randomUUID();
+  writeStorage(DEVICE_KEY, created);
+  return created;
 }
 
 /** The browser cannot reveal the computer's real name, so describe it instead. */
 function deviceName(): string {
   const nav = navigator as Navigator & {
-    userAgentData?: { platform?: string }
-  }
-  return describeDevice(navigator.userAgent, nav.userAgentData?.platform)
+    userAgentData?: { platform?: string };
+  };
+  return describeDevice(navigator.userAgent, nav.userAgentData?.platform);
 }
 
 async function api<T>(
@@ -101,19 +106,19 @@ async function api<T>(
     const response = await fetch(path, {
       ...init,
       headers: { "Content-Type": "application/json", ...init?.headers },
-    })
-    const data = (await response.json()) as T & { error?: string }
+    });
+    const data = (await response.json()) as T & { error?: string };
     return response.ok
       ? { ok: true, data }
-      : { ok: false, error: data.error ?? "Something went wrong." }
+      : { ok: false, error: data.error ?? "Something went wrong." };
   } catch {
-    return { ok: false, error: "Network error. Check your connection." }
+    return { ok: false, error: "Network error. Check your connection." };
   }
 }
 
 /** Rounds a computed price so it reads naturally (e.g. 5.2917 not 5.291700000001). */
 function roundPrice(value: number): number {
-  return Number(value.toPrecision(8))
+  return Number(value.toPrecision(8));
 }
 
 function BellIcon() {
@@ -132,85 +137,91 @@ function BellIcon() {
       <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.7 21a2 2 0 0 1-3.4 0" />
     </svg>
-  )
+  );
 }
 
 export function PriceAlerts({ quote }: PriceAlertsProps) {
-  const { t, tError } = useI18n()
-  const { formatTarget } = useFormatters()
-  const dialogRef = useRef<HTMLDialogElement>(null)
-  const [open, setOpen] = useState(false)
-  const [status, setStatus] = useState<Status>("checking")
-  const [alerts, setAlerts] = useState<PriceAlert[]>([])
-  const [message, setMessage] = useState("")
-  const [busy, setBusy] = useState(false)
+  const { t, tError } = useI18n();
+  const { formatTarget } = useFormatters();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<Status>("checking");
+  const [publicKey, setPublicKey] = useState("");
+  const [alerts, setAlerts] = useState<PriceAlert[]>([]);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const [kind, setKind] = useState<Kind>("below")
-  const [value, setValue] = useState("")
-  const [currency, setCurrency] = useState(quote.currency)
+  const [kind, setKind] = useState<Kind>("below");
+  const [value, setValue] = useState("");
+  const [currency, setCurrency] = useState(quote.currency);
 
   useEffect(() => {
-    setCurrency(quote.currency)
-  }, [quote.currency])
+    setCurrency(quote.currency);
+  }, [quote.currency]);
 
   const loadAlerts = useCallback(async () => {
     const result = await api<{ alerts: PriceAlert[] }>(
       `/api/alerts?deviceId=${encodeURIComponent(getDeviceId())}`,
-    )
-    setAlerts(result.ok ? result.data.alerts : [])
-    return result.ok
-  }, [])
+    );
+    setAlerts(result.ok ? result.data.alerts : []);
+    return result.ok;
+  }, []);
 
   useEffect(() => {
     async function detect() {
-      if (!PUBLIC_KEY) return setStatus("unconfigured")
+      // The public key comes from the server at runtime (not baked into the build).
+      const config = await api<{ publicKey: string }>("/api/alerts/config");
+      if (!config.ok || !config.data.publicKey) {
+        return setStatus("unconfigured");
+      }
+      setPublicKey(config.data.publicKey);
       if (
         !("serviceWorker" in navigator) ||
         !("PushManager" in window) ||
         !("Notification" in window)
       ) {
-        return setStatus("unsupported")
+        return setStatus("unsupported");
       }
-      if (Notification.permission === "denied") return setStatus("blocked")
+      if (Notification.permission === "denied") return setStatus("blocked");
 
-      const registration = await navigator.serviceWorker.getRegistration("/")
-      const subscription = await registration?.pushManager.getSubscription()
-      if (subscription && (await loadAlerts())) setStatus("on")
-      else setStatus("off")
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription && (await loadAlerts())) setStatus("on");
+      else setStatus("off");
     }
-    detect().catch(() => setStatus("unsupported"))
-  }, [loadAlerts])
+    detect().catch(() => setStatus("unsupported"));
+  }, [loadAlerts]);
 
   // Open/close the native <dialog> (gives focus trapping and Esc for free).
   useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    if (open && !dialog.open) dialog.showModal()
-    if (!open && dialog.open) dialog.close()
-  }, [open])
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
 
   async function enable() {
-    setBusy(true)
-    setMessage("")
+    setBusy(true);
+    setMessage("");
     try {
-      const permission = await Notification.requestPermission()
+      const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        setStatus(permission === "denied" ? "blocked" : "off")
-        setMessage(t.alerts.notAllowed)
-        return
+        setStatus(permission === "denied" ? "blocked" : "off");
+        setMessage(t.alerts.notAllowed);
+        return;
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js")
-      await navigator.serviceWorker.ready
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
       const subscription =
         (await registration.pushManager.getSubscription()) ??
         (await withTimeout(
           registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToBytes(PUBLIC_KEY),
+            applicationServerKey: urlBase64ToBytes(publicKey),
           }),
           SUBSCRIBE_TIMEOUT_MS,
-        ))
+        ));
 
       const result = await api("/api/alerts/device", {
         method: "POST",
@@ -219,80 +230,80 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
           label: deviceName(),
           subscription: subscription.toJSON(),
         }),
-      })
+      });
       if (!result.ok) {
-        setMessage(tError(result.error))
-        return
+        setMessage(tError(result.error));
+        return;
       }
-      await loadAlerts()
-      setStatus("on")
-      setMessage(t.alerts.nowOn)
+      await loadAlerts();
+      setStatus("on");
+      setMessage(t.alerts.nowOn);
     } catch {
-      setMessage(t.alerts.enableFailed)
+      setMessage(t.alerts.enableFailed);
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
   }
 
   async function disable() {
-    setBusy(true)
-    setMessage("")
+    setBusy(true);
+    setMessage("");
     try {
       await api("/api/alerts/device", {
         method: "DELETE",
         body: JSON.stringify({ deviceId: getDeviceId() }),
-      })
-      const registration = await navigator.serviceWorker.getRegistration("/")
-      await (await registration?.pushManager.getSubscription())?.unsubscribe()
-      setAlerts([])
-      setStatus("off")
-      setMessage(t.alerts.nowOff)
+      });
+      const registration = await navigator.serviceWorker.getRegistration("/");
+      await (await registration?.pushManager.getSubscription())?.unsubscribe();
+      setAlerts([]);
+      setStatus("off");
+      setMessage(t.alerts.nowOff);
     } catch {
-      setMessage(t.alerts.disableFailed)
+      setMessage(t.alerts.disableFailed);
     } finally {
-      setBusy(false)
+      setBusy(false);
     }
   }
 
   async function sendTest() {
-    setBusy(true)
+    setBusy(true);
     const result = await api("/api/alerts/test", {
       method: "POST",
       body: JSON.stringify({ deviceId: getDeviceId() }),
-    })
-    setMessage(result.ok ? t.alerts.testSent : tError(result.error))
-    setBusy(false)
+    });
+    setMessage(result.ok ? t.alerts.testSent : tError(result.error));
+    setBusy(false);
   }
 
-  const kindConfig = KINDS.find((entry) => entry.id === kind) ?? KINDS[0]
-  const number = Number(value.replace(",", "."))
+  const kindConfig = KINDS.find((entry) => entry.id === kind) ?? KINDS[0];
+  const number = Number(value.replace(",", "."));
   const validNumber =
-    value.trim() !== "" && Number.isFinite(number) && number > 0
+    value.trim() !== "" && Number.isFinite(number) && number > 0;
 
   /** What will be saved, plus a plain-language preview of it. */
   function buildAlert(): {
-    condition: "above" | "below" | "reaches"
-    target: number
-    currency: string
+    condition: "above" | "below" | "reaches";
+    target: number;
+    currency: string;
   } | null {
-    if (!validNumber) return null
+    if (!validNumber) return null;
     if (kindConfig.percent) {
-      const factor = kind === "rise" ? 1 + number / 100 : 1 - number / 100
-      if (factor <= 0) return null
+      const factor = kind === "rise" ? 1 + number / 100 : 1 - number / 100;
+      if (factor <= 0) return null;
       return {
         condition: kind === "rise" ? "above" : "below",
         target: roundPrice(quote.price * factor),
         currency: quote.currency,
-      }
+      };
     }
     return {
       condition: kind as "above" | "below" | "reaches",
       target: number,
       currency,
-    }
+    };
   }
 
-  const planned = buildAlert()
+  const planned = buildAlert();
   const preview = planned
     ? (planned.condition === "above"
         ? t.alerts.previewAbove
@@ -302,13 +313,13 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
         quote.name,
         formatTarget(planned.target, planned.currency),
       )
-    : ""
+    : "";
 
   async function addAlert(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!planned) return
-    setBusy(true)
-    setMessage("")
+    event.preventDefault();
+    if (!planned) return;
+    setBusy(true);
+    setMessage("");
     const result = await api("/api/alerts", {
       method: "POST",
       body: JSON.stringify({
@@ -319,39 +330,39 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
           ...planned,
         },
       }),
-    })
+    });
     if (result.ok) {
-      setValue("")
-      setMessage(t.alerts.created)
-      await loadAlerts()
+      setValue("");
+      setMessage(t.alerts.created);
+      await loadAlerts();
     } else {
-      setMessage(tError(result.error))
+      setMessage(tError(result.error));
     }
-    setBusy(false)
+    setBusy(false);
   }
 
   async function removeAlert(id: string) {
     const result = await api(
       `/api/alerts?deviceId=${encodeURIComponent(getDeviceId())}&id=${encodeURIComponent(id)}`,
       { method: "DELETE" },
-    )
-    if (result.ok) await loadAlerts()
-    else setMessage(tError(result.error))
+    );
+    if (result.ok) await loadAlerts();
+    else setMessage(tError(result.error));
   }
 
-  const forThisAsset = alerts.filter((alert) => alert.symbol === quote.symbol)
-  const others = alerts.filter((alert) => alert.symbol !== quote.symbol)
-  const activeHere = forThisAsset.filter((alert) => alert.triggeredAt === null)
-  const currencies = [...new Set([quote.currency, "USD", "BRL"])]
+  const forThisAsset = alerts.filter((alert) => alert.symbol === quote.symbol);
+  const others = alerts.filter((alert) => alert.symbol !== quote.symbol);
+  const activeHere = forThisAsset.filter((alert) => alert.triggeredAt === null);
+  const currencies = [...new Set([quote.currency, "USD", "BRL"])];
 
   return (
     <>
       <button
         type="button"
         onClick={() => {
-          setMessage("")
-          setOpen(true)
-          if (status === "on") void loadAlerts()
+          setMessage("");
+          setOpen(true);
+          if (status === "on") void loadAlerts();
         }}
         aria-label={
           activeHere.length > 0
@@ -378,10 +389,10 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
         onClose={() => setOpen(false)}
         onClick={(event) => {
           // A click on the dimmed backdrop (the dialog element itself) closes it.
-          if (event.target === event.currentTarget) setOpen(false)
+          if (event.target === event.currentTarget) setOpen(false);
         }}
         onKeyDown={(event) => {
-          if (event.key === "Escape") setOpen(false)
+          if (event.key === "Escape") setOpen(false);
         }}
         className="m-auto w-[min(34rem,calc(100vw-2rem))] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl border border-line-strong bg-surface p-0 text-ink backdrop:bg-black/70"
       >
@@ -562,7 +573,7 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
         </div>
       </dialog>
     </>
-  )
+  );
 }
 
 function describe(
@@ -575,8 +586,8 @@ function describe(
       ? "≥"
       : alert.condition === "below"
         ? "≤"
-        : reaches
-  return `${verb} ${format(alert.target, alert.currency)}`
+        : reaches;
+  return `${verb} ${format(alert.target, alert.currency)}`;
 }
 
 function AlertList({
@@ -584,13 +595,13 @@ function AlertList({
   alerts,
   onRemove,
 }: {
-  title: string
-  alerts: PriceAlert[]
-  onRemove: (id: string) => void
+  title: string;
+  alerts: PriceAlert[];
+  onRemove: (id: string) => void;
 }) {
-  const { t } = useI18n()
-  const { formatTarget } = useFormatters()
-  if (alerts.length === 0) return null
+  const { t } = useI18n();
+  const { formatTarget } = useFormatters();
+  if (alerts.length === 0) return null;
   return (
     <div className="flex flex-col gap-2">
       <h4 className="text-sm font-semibold text-muted">{title}</h4>
@@ -628,5 +639,5 @@ function AlertList({
         ))}
       </ul>
     </div>
-  )
+  );
 }

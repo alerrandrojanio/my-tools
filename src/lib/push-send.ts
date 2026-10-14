@@ -1,23 +1,33 @@
-import webpush from "web-push"
-import type { PushPayload, PushSubscriptionData } from "./alert-utils"
+import webpush from "web-push";
+import type { PushPayload, PushSubscriptionData } from "./alert-utils";
 
-export type SendResult = "sent" | "gone" | "failed"
+export type SendResult = "sent" | "gone" | "failed";
 
-let configured = false
+let configured = false;
+
+/**
+ * The VAPID public key. It is public by design (the browser needs it to
+ * subscribe), so it is served to the page by /api/alerts/config at runtime.
+ */
+export function getVapidPublicKey(): string | null {
+  return (
+    process.env.NP_VAPID_PUBLIC_KEY || process.env.VAPID_PUBLIC_KEY || null
+  );
+}
 
 function configure(): boolean {
-  if (configured) return true
-  const publicKey = process.env.NP_VAPID_PUBLIC_KEY
-  const privateKey = process.env.VAPID_PRIVATE_KEY
-  const subject = process.env.VAPID_SUBJECT
-  if (!publicKey || !privateKey || !subject) return false
-  webpush.setVapidDetails(subject, publicKey, privateKey)
-  configured = true
-  return true
+  if (configured) return true;
+  const publicKey = getVapidPublicKey();
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  const subject = process.env.VAPID_SUBJECT;
+  if (!publicKey || !privateKey || !subject) return false;
+  webpush.setVapidDetails(subject, publicKey, privateKey);
+  configured = true;
+  return true;
 }
 
 export function isPushConfigured(): boolean {
-  return configure()
+  return configure();
 }
 
 /** "gone" means the browser revoked the subscription and it should be deleted. */
@@ -25,17 +35,17 @@ export async function sendPush(
   subscription: PushSubscriptionData,
   payload: PushPayload,
 ): Promise<SendResult> {
-  if (!configure()) return "failed"
+  if (!configure()) return "failed";
   try {
     await webpush.sendNotification(subscription, JSON.stringify(payload), {
       TTL: 60 * 60,
       urgency: "high",
-    })
-    return "sent"
+    });
+    return "sent";
   } catch (error) {
-    const status = (error as { statusCode?: number }).statusCode
-    if (status === 404 || status === 410) return "gone"
-    console.error("[push] send failed", status ?? error)
-    return "failed"
+    const status = (error as { statusCode?: number }).statusCode;
+    if (status === 404 || status === 410) return "gone";
+    console.error("[push] send failed", status ?? error);
+    return "failed";
   }
 }
