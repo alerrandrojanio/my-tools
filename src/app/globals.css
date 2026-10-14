@@ -15,6 +15,8 @@
   --color-accent-icon: color-mix(in srgb, #7c3aed 45%, #ffffff);
   --color-focus: #a78bfa;
   --color-danger: #fca5a5;
+  --color-up: #4ade80;
+  --color-down: #f87171;
   --font-sans: var(--font-jakarta);
   --font-mono: var(--font-jetbrains-mono);
 }

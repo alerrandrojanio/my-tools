@@ -1,19 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/i18n/provider";
 import { countText } from "@/lib/word-counter";
 
 export function WordCounter() {
+  const { t } = useI18n();
   const [text, setText] = useState("");
   const stats = countText(text);
 
   const items = [
-    { label: "Words", value: stats.words },
-    { label: "Characters", value: stats.characters },
-    { label: "Characters (no spaces)", value: stats.charactersNoSpaces },
-    { label: "Sentences", value: stats.sentences },
-    { label: "Paragraphs", value: stats.paragraphs },
-    { label: "Reading time", value: `${stats.readingMinutes} min` },
+    { label: t.wordCounter.words, value: stats.words },
+    { label: t.wordCounter.characters, value: stats.characters },
+    {
+      label: t.wordCounter.charactersNoSpaces,
+      value: stats.charactersNoSpaces,
+    },
+    { label: t.wordCounter.sentences, value: stats.sentences },
+    { label: t.wordCounter.paragraphs, value: stats.paragraphs },
+    {
+      label: t.wordCounter.readingTime,
+      value: t.wordCounter.minutes(stats.readingMinutes),
+    },
   ];
 
   return (
@@ -32,13 +40,13 @@ export function WordCounter() {
 
       <div className="flex flex-col gap-2">
         <label htmlFor="wc-input" className="text-[15px] font-semibold">
-          Your text
+          {t.wordCounter.yourText}
         </label>
         <textarea
           id="wc-input"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          placeholder="Type or paste your text here…"
+          placeholder={t.wordCounter.placeholder}
           className="min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 text-[16px] leading-relaxed text-ink placeholder:text-muted"
         />
       </div>
@@ -50,7 +58,7 @@ export function WordCounter() {
           disabled={text === ""}
           className="inline-flex min-h-11 items-center rounded-[10px] border border-line-strong px-4.5 text-[15px] font-semibold text-ink transition hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Clear
+          {t.common.clear}
         </button>
       </div>
     </div>

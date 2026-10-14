@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
+import { useI18n } from "@/i18n/provider";
 import {
   generatePassword,
   MAX_PASSWORD_LENGTH,
@@ -22,13 +23,12 @@ const DEFAULT_OPTIONS: PasswordOptions = {
   symbols: true,
 };
 
-const OPTION_LABELS: readonly { key: keyof PasswordOptions; label: string }[] =
-  [
-    { key: "lowercase", label: "Lowercase (a–z)" },
-    { key: "uppercase", label: "Uppercase (A–Z)" },
-    { key: "digits", label: "Digits (0–9)" },
-    { key: "symbols", label: "Symbols (!@#…)" },
-  ];
+const OPTION_KEYS: readonly (keyof PasswordOptions)[] = [
+  "lowercase",
+  "uppercase",
+  "digits",
+  "symbols",
+];
 
 function build(length: number, options: PasswordOptions): Output {
   const result = generatePassword(length, options);
@@ -38,6 +38,7 @@ function build(length: number, options: PasswordOptions): Output {
 }
 
 export function PasswordGenerator() {
+  const { t, tError } = useI18n();
   const [length, setLength] = useState(DEFAULT_LENGTH);
   const [lengthText, setLengthText] = useState(String(DEFAULT_LENGTH));
   const [options, setOptions] = useState<PasswordOptions>(DEFAULT_OPTIONS);
@@ -77,7 +78,9 @@ export function PasswordGenerator() {
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
       <div className="flex flex-col gap-2">
-        <span className="text-[15px] font-semibold">Your password</span>
+        <span className="text-[15px] font-semibold">
+          {t.password.yourPassword}
+        </span>
         <output
           aria-live="polite"
           className="block min-h-16 break-all rounded-xl border border-line-strong bg-canvas p-4 font-mono text-[clamp(18px,2.4vw,24px)] leading-relaxed"
@@ -85,24 +88,24 @@ export function PasswordGenerator() {
           {output.password}
         </output>
         <p role="alert" className="min-h-6 text-[15px] text-danger">
-          {output.error}
+          {output.error && tError(output.error)}
         </p>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <CopyButton text={output.password} label="Copy password" />
+        <CopyButton text={output.password} label={t.password.copy} />
         <button
           type="button"
           onClick={() => setOutput(build(length, options))}
           className="inline-flex min-h-11 items-center rounded-[10px] border border-line-strong px-4.5 text-[15px] font-semibold text-ink transition hover:bg-surface-hover"
         >
-          Generate new
+          {t.password.generateNew}
         </button>
       </div>
 
       <div className="flex flex-col gap-3">
         <label htmlFor="pw-length" className="text-[15px] font-semibold">
-          Number of characters ({MIN_PASSWORD_LENGTH}–{MAX_PASSWORD_LENGTH})
+          {t.password.length(MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)}
         </label>
         <div className="flex flex-wrap items-center gap-4">
           <input
@@ -118,7 +121,7 @@ export function PasswordGenerator() {
           />
           <input
             type="range"
-            aria-label="Password length"
+            aria-label={t.password.lengthAria}
             min={MIN_PASSWORD_LENGTH}
             max={MAX_PASSWORD_LENGTH}
             value={length}
@@ -130,9 +133,9 @@ export function PasswordGenerator() {
 
       <fieldset className="m-0 flex min-w-0 flex-wrap gap-x-6 gap-y-1 border-0 p-0">
         <legend className="mb-1 text-[15px] font-semibold">
-          Character types
+          {t.password.types}
         </legend>
-        {OPTION_LABELS.map(({ key, label }) => (
+        {OPTION_KEYS.map((key) => (
           <label
             key={key}
             className="flex h-11 cursor-pointer items-center gap-2.5 text-[15px]"
@@ -143,15 +146,12 @@ export function PasswordGenerator() {
               onChange={(event) => handleOption(key, event.target.checked)}
               className="size-4.5 accent-accent"
             />
-            {label}
+            {t.password[key]}
           </label>
         ))}
       </fieldset>
 
-      <p className="text-sm text-muted">
-        Passwords are generated in your browser with a cryptographically secure
-        random source and are never sent anywhere.
-      </p>
+      <p className="text-sm text-muted">{t.password.note}</p>
     </div>
   );
 }

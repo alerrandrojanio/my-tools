@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/provider";
 import {
   buildFileName,
   decodeBase64ToFile,
@@ -18,8 +19,9 @@ const GHOST_BUTTON =
   "inline-flex min-h-11 items-center rounded-[10px] border border-line-strong px-4.5 text-[15px] font-semibold text-ink transition hover:bg-surface-hover disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Base64ToFile() {
+  const { t, tError } = useI18n();
   const [input, setInput] = useState("");
-  const [fileName, setFileName] = useState("file");
+  const [fileName, setFileName] = useState(t.base64File.defaultFileName);
   const [converted, setConverted] = useState<ConvertedFile | null>(null);
   const [error, setError] = useState("");
 
@@ -43,7 +45,7 @@ export function Base64ToFile() {
 
     const result = decodeBase64ToFile(input);
     if (!result.ok) {
-      setError(result.error);
+      setError(tError(result.error));
       return;
     }
 
@@ -68,7 +70,7 @@ export function Base64ToFile() {
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
       <div className="flex flex-col gap-2">
         <label htmlFor="b64f-input" className="text-[15px] font-semibold">
-          Base64 (raw or data URI)
+          {t.base64File.inputLabel}
         </label>
         <textarea
           id="b64f-input"
@@ -77,14 +79,14 @@ export function Base64ToFile() {
           spellCheck={false}
           aria-invalid={error !== ""}
           aria-describedby="b64f-error"
-          placeholder="Paste Base64 here, e.g. iVBORw0KGgo… or data:image/png;base64,iVBORw0KGgo…"
+          placeholder={t.base64File.placeholder}
           className="min-h-[20rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 font-mono text-[14px] leading-relaxed text-ink placeholder:text-muted"
         />
       </div>
 
       <div className="flex flex-col gap-2">
         <label htmlFor="b64f-name" className="text-[15px] font-semibold">
-          File name
+          {t.base64File.fileName}
         </label>
         <input
           id="b64f-name"
@@ -95,9 +97,7 @@ export function Base64ToFile() {
           spellCheck={false}
           className="h-12 w-full max-w-md rounded-xl border border-line-strong bg-canvas px-4 text-[15px] text-ink"
         />
-        <p className="text-sm text-muted">
-          The extension is added automatically when the file type is detected.
-        </p>
+        <p className="text-sm text-muted">{t.base64File.fileNameHint}</p>
       </div>
 
       <p
@@ -115,7 +115,7 @@ export function Base64ToFile() {
           disabled={input.trim() === ""}
           className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Convert to file
+          {t.base64File.convert}
         </button>
         <button
           type="button"
@@ -123,7 +123,7 @@ export function Base64ToFile() {
           disabled={input === "" && converted === null}
           className={GHOST_BUTTON}
         >
-          Clear
+          {t.common.clear}
         </button>
       </div>
 
@@ -133,14 +133,14 @@ export function Base64ToFile() {
           className="flex flex-col gap-4 rounded-xl border border-line-strong bg-canvas p-5"
         >
           <h2 id="b64f-result" className="text-lg font-bold">
-            File ready
+            {t.base64File.ready}
           </h2>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[15px]">
-            <dt className="text-muted">Name</dt>
+            <dt className="text-muted">{t.base64File.name}</dt>
             <dd className="break-all font-mono">{converted.name}</dd>
-            <dt className="text-muted">Type</dt>
+            <dt className="text-muted">{t.base64File.type}</dt>
             <dd className="font-mono">{converted.mime}</dd>
-            <dt className="text-muted">Size</dt>
+            <dt className="text-muted">{t.base64File.size}</dt>
             <dd>{formatBytes(converted.size)}</dd>
           </dl>
 
@@ -149,7 +149,7 @@ export function Base64ToFile() {
               {/* biome-ignore lint/performance/noImgElement: local blob preview, next/image can't optimize it */}
               <img
                 src={converted.url}
-                alt={`Preview of ${converted.name}`}
+                alt={t.base64File.preview(converted.name)}
                 className="max-h-80 max-w-full object-contain"
               />
             </div>
@@ -157,7 +157,7 @@ export function Base64ToFile() {
           {converted.mime === "application/pdf" && (
             <iframe
               src={converted.url}
-              title={`Preview of ${converted.name}`}
+              title={t.base64File.preview(converted.name)}
               className="h-96 w-full rounded-lg border-0 bg-white"
             />
           )}
@@ -168,7 +168,7 @@ export function Base64ToFile() {
               download={converted.name}
               className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90"
             >
-              Download file
+              {t.base64File.download}
             </a>
           </div>
         </section>

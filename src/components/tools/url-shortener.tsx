@@ -2,6 +2,7 @@
 
 import { type FormEvent, useState } from "react";
 import { CopyButton } from "@/components/copy-button";
+import { useI18n } from "@/i18n/provider";
 
 interface ShortenResponse {
   shortUrl?: string;
@@ -9,6 +10,7 @@ interface ShortenResponse {
 }
 
 export function UrlShortener() {
+  const { t, tError } = useI18n();
   const [url, setUrl] = useState("");
   const [shortUrl, setShortUrl] = useState("");
   const [error, setError] = useState("");
@@ -29,12 +31,12 @@ export function UrlShortener() {
       const data = (await response.json()) as ShortenResponse;
 
       if (!response.ok || !data.shortUrl) {
-        setError(data.error ?? "Could not create the short link.");
+        setError(data.error ? tError(data.error) : t.url.failed);
       } else {
         setShortUrl(data.shortUrl);
       }
     } catch {
-      setError("Network error. Check your connection and try again.");
+      setError(t.common.networkError);
     } finally {
       setBusy(false);
     }
@@ -44,7 +46,7 @@ export function UrlShortener() {
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <label htmlFor="long-url" className="text-[15px] font-semibold">
-          Long URL
+          {t.url.longUrl}
         </label>
         <div className="flex flex-wrap gap-3">
           <input
@@ -57,7 +59,7 @@ export function UrlShortener() {
             onChange={(event) => setUrl(event.target.value)}
             aria-invalid={error !== ""}
             aria-describedby="shorten-error"
-            placeholder="https://example.com/a/very/long/link"
+            placeholder={t.url.placeholder}
             className="h-12 min-w-64 flex-1 rounded-xl border border-line-strong bg-canvas px-4 text-[15px] text-ink placeholder:text-muted"
           />
           <button
@@ -65,7 +67,7 @@ export function UrlShortener() {
             disabled={busy || url.trim() === ""}
             className="inline-flex min-h-12 items-center rounded-xl bg-accent px-5 text-[15px] font-semibold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {busy ? "Shortening…" : "Shorten URL"}
+            {busy ? t.url.shortening : t.url.shorten}
           </button>
         </div>
       </form>
@@ -80,7 +82,7 @@ export function UrlShortener() {
 
       {shortUrl && (
         <div className="flex flex-col gap-2">
-          <span className="text-[15px] font-semibold">Your short link</span>
+          <span className="text-[15px] font-semibold">{t.url.yourLink}</span>
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line-strong bg-canvas p-4">
             <a
               href={shortUrl}
@@ -90,15 +92,12 @@ export function UrlShortener() {
             >
               {shortUrl}
             </a>
-            <CopyButton text={shortUrl} label="Copy link" />
+            <CopyButton text={shortUrl} label={t.url.copyLink} />
           </div>
         </div>
       )}
 
-      <p className="text-sm text-muted">
-        Short links are stored on our server so they can redirect. Only http and
-        https links are accepted.
-      </p>
+      <p className="text-sm text-muted">{t.url.note}</p>
     </div>
   );
 }

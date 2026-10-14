@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/i18n/provider";
 import {
   type Base64Result,
   decodeBase64,
@@ -9,10 +10,7 @@ import {
 
 type Mode = "encode" | "decode";
 
-const MODES: readonly { id: Mode; label: string }[] = [
-  { id: "encode", label: "String → Base64" },
-  { id: "decode", label: "Base64 → String" },
-];
+const MODES: readonly Mode[] = ["encode", "decode"];
 
 const FIELD =
   "min-h-[28rem] w-full resize-y rounded-xl border border-line-strong bg-canvas py-4 pr-6 pl-4 font-mono text-[15px] leading-relaxed text-ink placeholder:text-muted";
@@ -28,6 +26,7 @@ function convert(mode: Mode, input: string, urlSafe: boolean): Base64Result {
 }
 
 export function Base64Converter() {
+  const { t, tError } = useI18n();
   const [mode, setMode] = useState<Mode>("encode");
   const [input, setInput] = useState("");
   const [urlSafe, setUrlSafe] = useState(false);
@@ -54,8 +53,8 @@ export function Base64Converter() {
   return (
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
       <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
-        <legend className="sr-only">Conversion direction</legend>
-        {MODES.map(({ id, label }) => (
+        <legend className="sr-only">{t.base64.directionLegend}</legend>
+        {MODES.map((id) => (
           <button
             key={id}
             type="button"
@@ -67,7 +66,7 @@ export function Base64Converter() {
                 : "border border-line-strong text-muted hover:bg-surface-hover hover:text-ink"
             }`}
           >
-            {label}
+            {t.base64[id]}
           </button>
         ))}
       </fieldset>
@@ -75,7 +74,7 @@ export function Base64Converter() {
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor="b64-input" className="text-[15px] font-semibold">
-            {mode === "encode" ? "Text to encode" : "Base64 to decode"}
+            {mode === "encode" ? t.base64.inputEncode : t.base64.inputDecode}
           </label>
           <textarea
             id="b64-input"
@@ -85,7 +84,9 @@ export function Base64Converter() {
             aria-invalid={!result.ok}
             aria-describedby={result.ok ? undefined : "b64-error"}
             placeholder={
-              mode === "encode" ? "Type or paste text…" : "Paste Base64 here…"
+              mode === "encode"
+                ? t.base64.placeholderEncode
+                : t.base64.placeholderDecode
             }
             className={FIELD}
           />
@@ -93,14 +94,14 @@ export function Base64Converter() {
 
         <div className="flex flex-col gap-2">
           <label htmlFor="b64-output" className="text-[15px] font-semibold">
-            Result
+            {t.common.result}
           </label>
           <textarea
             id="b64-output"
             value={output}
             readOnly
             spellCheck={false}
-            placeholder="The result appears here."
+            placeholder={t.common.resultPlaceholder}
             className={FIELD}
           />
         </div>
@@ -111,7 +112,7 @@ export function Base64Converter() {
         role="alert"
         className={`text-[15px] text-danger ${result.ok ? "hidden" : ""}`}
       >
-        {result.ok ? "" : result.error}
+        {result.ok ? "" : tError(result.error)}
       </p>
 
       {mode === "encode" && (
@@ -122,7 +123,7 @@ export function Base64Converter() {
             onChange={(event) => setUrlSafe(event.target.checked)}
             className="size-4.5 accent-accent"
           />
-          URL-safe output (uses “-” and “_”, no padding)
+          {t.base64.urlSafe}
         </label>
       )}
 
@@ -133,7 +134,7 @@ export function Base64Converter() {
           disabled={output === ""}
           className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100"
         >
-          {copied ? "Copied!" : "Copy result"}
+          {copied ? t.common.copied : t.common.copyResult}
         </button>
         <button
           type="button"
@@ -141,7 +142,7 @@ export function Base64Converter() {
           disabled={output === ""}
           className={BUTTON}
         >
-          Use result as input
+          {t.base64.useAsInput}
         </button>
         <button
           type="button"
@@ -149,7 +150,7 @@ export function Base64Converter() {
           disabled={input === ""}
           className={BUTTON}
         >
-          Clear
+          {t.common.clear}
         </button>
       </div>
     </div>

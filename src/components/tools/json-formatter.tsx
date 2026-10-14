@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CopyButton } from "@/components/copy-button";
+import { useI18n } from "@/i18n/provider";
 import {
   formatJson,
   type JsonIndent,
@@ -11,12 +12,12 @@ import {
 
 const INDENT_OPTIONS: readonly {
   value: string;
-  label: string;
+  label: "spaces2" | "spaces4" | "tab";
   indent: JsonIndent;
 }[] = [
-  { value: "2", label: "2 spaces", indent: 2 },
-  { value: "4", label: "4 spaces", indent: 4 },
-  { value: "tab", label: "Tab", indent: "tab" },
+  { value: "2", label: "spaces2", indent: 2 },
+  { value: "4", label: "spaces4", indent: 4 },
+  { value: "tab", label: "tab", indent: "tab" },
 ];
 
 const FIELD =
@@ -29,6 +30,7 @@ const PRIMARY_BUTTON =
   "inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50";
 
 export function JsonFormatter() {
+  const { t } = useI18n();
   const [input, setInput] = useState("");
   const [indentValue, setIndentValue] = useState("2");
   const [sortKeys, setSortKeys] = useState(false);
@@ -53,7 +55,7 @@ export function JsonFormatter() {
       <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
         <div className="flex flex-col gap-2">
           <label htmlFor="indent" className="text-[15px] font-semibold">
-            Indentation
+            {t.json.indentation}
           </label>
           <select
             id="indent"
@@ -63,7 +65,7 @@ export function JsonFormatter() {
           >
             {INDENT_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {t.json[option.label]}
               </option>
             ))}
           </select>
@@ -76,14 +78,14 @@ export function JsonFormatter() {
             onChange={(event) => setSortKeys(event.target.checked)}
             className="size-4.5 accent-accent"
           />
-          Sort keys alphabetically
+          {t.json.sortKeys}
         </label>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor="json-input" className="text-[15px] font-semibold">
-            JSON input
+            {t.json.input}
           </label>
           <textarea
             id="json-input"
@@ -102,14 +104,14 @@ export function JsonFormatter() {
 
         <div className="flex flex-col gap-2">
           <label htmlFor="json-output" className="text-[15px] font-semibold">
-            Result
+            {t.common.result}
           </label>
           <textarea
             id="json-output"
             value={output}
             readOnly
             spellCheck={false}
-            placeholder="The result appears here."
+            placeholder={t.common.resultPlaceholder}
             className={FIELD}
           />
         </div>
@@ -124,12 +126,8 @@ export function JsonFormatter() {
         {result === null
           ? ""
           : result.ok
-            ? "Valid JSON."
-            : `Invalid JSON${
-                result.line !== undefined
-                  ? ` (line ${result.line}, column ${result.column})`
-                  : ""
-              }: ${result.error}`}
+            ? t.json.valid
+            : t.json.invalid(result.error, result.line, result.column)}
       </output>
 
       <div className="flex flex-wrap gap-3">
@@ -139,7 +137,7 @@ export function JsonFormatter() {
           disabled={isBlank}
           className={PRIMARY_BUTTON}
         >
-          Format / Validate
+          {t.json.format}
         </button>
         <button
           type="button"
@@ -147,9 +145,9 @@ export function JsonFormatter() {
           disabled={isBlank}
           className={GHOST_BUTTON}
         >
-          Minify
+          {t.json.minify}
         </button>
-        <CopyButton text={output} label="Copy result" />
+        <CopyButton text={output} label={t.common.copyResult} />
         <button
           type="button"
           onClick={() => {
@@ -159,7 +157,7 @@ export function JsonFormatter() {
           disabled={input === ""}
           className={GHOST_BUTTON}
         >
-          Clear
+          {t.common.clear}
         </button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CopyButton } from "@/components/copy-button";
+import { useI18n } from "@/i18n/provider";
 import {
   generateCnpj,
   generateCpf,
@@ -24,6 +25,7 @@ const FIELD =
   "w-full rounded-xl border border-line-strong bg-canvas px-4 font-mono text-[15px] text-ink placeholder:text-muted";
 
 export function CpfCnpjGenerator() {
+  const { t } = useI18n();
   const [type, setType] = useState<DocType>("cpf");
   const [formatted, setFormatted] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -59,11 +61,11 @@ export function CpfCnpjGenerator() {
         className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]"
       >
         <h2 id="generate-title" className="text-xl font-bold">
-          Generate
+          {t.cpf.generateTitle}
         </h2>
 
         <fieldset className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
-          <legend className="sr-only">Document type</legend>
+          <legend className="sr-only">{t.cpf.docTypeLegend}</legend>
           {DOC_TYPES.map(({ id, label }) => (
             <button
               key={id}
@@ -84,7 +86,7 @@ export function CpfCnpjGenerator() {
         <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="quantity" className="text-[15px] font-semibold">
-              Quantity (1–{MAX_QUANTITY})
+              {t.cpf.quantity(MAX_QUANTITY)}
             </label>
             <input
               id="quantity"
@@ -112,7 +114,7 @@ export function CpfCnpjGenerator() {
               onChange={(event) => setFormatted(event.target.checked)}
               className="size-4.5 accent-accent"
             />
-            Formatted (with dots, slash and dash)
+            {t.cpf.formatted}
           </label>
         </div>
 
@@ -122,17 +124,17 @@ export function CpfCnpjGenerator() {
             onClick={handleGenerate}
             className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90"
           >
-            Generate {type.toUpperCase()}
+            {t.cpf.generate(type.toUpperCase())}
           </button>
           <CopyButton
             text={results.map((item) => item.value).join("\n")}
-            label="Copy all"
+            label={t.cpf.copyAll}
           />
         </div>
 
         {results.length > 0 && (
           <ul
-            aria-label="Generated numbers"
+            aria-label={t.cpf.generatedLabel}
             className="flex flex-col gap-2 rounded-xl border border-line-strong bg-canvas p-4 font-mono text-[17px]"
           >
             {results.map(({ id, value }) => (
@@ -147,10 +149,7 @@ export function CpfCnpjGenerator() {
           </ul>
         )}
 
-        <p className="text-sm text-muted">
-          Numbers are mathematically valid but randomly generated. Use them only
-          for testing and development.
-        </p>
+        <p className="text-sm text-muted">{t.cpf.note}</p>
       </section>
 
       <section
@@ -158,10 +157,10 @@ export function CpfCnpjGenerator() {
         className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]"
       >
         <h2 id="validate-title" className="text-xl font-bold">
-          Validate a {type.toUpperCase()}
+          {t.cpf.validateTitle(type.toUpperCase())}
         </h2>
         <label htmlFor="candidate" className="text-[15px] font-semibold">
-          {type.toUpperCase()} number
+          {t.cpf.numberLabel(type.toUpperCase())}
         </label>
         <input
           id="candidate"
@@ -184,8 +183,8 @@ export function CpfCnpjGenerator() {
           {trimmed === ""
             ? ""
             : candidateIsValid
-              ? `Valid ${type.toUpperCase()}.`
-              : `Invalid ${type.toUpperCase()}.`}
+              ? t.cpf.valid(type.toUpperCase())
+              : t.cpf.invalid(type.toUpperCase())}
         </p>
       </section>
     </div>

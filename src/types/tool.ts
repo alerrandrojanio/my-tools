@@ -1,7 +1,8 @@
 export type ToolCategoryId =
   | "text-and-data"
   | "images-and-colors"
-  | "development-and-data";
+  | "development-and-data"
+  | "finance";
 
 export type ToolIconName =
   | "swap"
@@ -13,18 +14,30 @@ export type ToolIconName =
   | "braces"
   | "link"
   | "id-card"
-  | "download";
+  | "download"
+  | "trending-up";
 
+/** Titles and descriptions live in the language files (src/i18n). */
 export interface ToolCategory {
   id: ToolCategoryId;
-  title: string;
-  description: string;
 }
 
+export type ToolSlug =
+  | "base64-converter"
+  | "base64-to-file"
+  | "word-counter"
+  | "password-generator"
+  | "png-to-pdf"
+  | "qr-code-generator"
+  | "color-converter"
+  | "json-formatter"
+  | "url-shortener"
+  | "cpf-cnpj-generator"
+  | "market-quotes";
+
+/** Names and descriptions live in the language files (src/i18n). */
 export interface Tool {
-  slug: string;
-  name: string;
-  description: string;
+  slug: ToolSlug;
   categoryId: ToolCategoryId;
   icon: ToolIconName;
   href: string;

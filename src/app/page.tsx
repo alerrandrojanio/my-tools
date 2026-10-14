@@ -1,7 +1,10 @@
 import { ToolCard } from "@/components/tool-card";
 import { categories, getToolsByCategory, tools } from "@/data/tools-list";
+import { getTranslations } from "@/i18n/server";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { t } = await getTranslations();
+
   return (
     <>
       <section
@@ -10,24 +13,22 @@ export default function HomePage() {
       >
         <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-[22px] px-[clamp(16px,4vw,32px)] py-[clamp(56px,9vw,104px)]">
           <span className="rounded-full bg-accent-badge px-3 py-1.5 font-mono text-[13px] font-medium uppercase tracking-[0.04em] text-accent-soft">
-            {tools.length} tools · {categories.length} categories
+            {t.home.badge(tools.length, categories.length)}
           </span>
           <h1
             id="hero-title"
             className="max-w-[780px] text-[clamp(36px,5.2vw,62px)] font-extrabold leading-[1.06] tracking-[-0.025em]"
           >
-            Everyday tools, one click away.
+            {t.home.title}
           </h1>
           <p className="max-w-[620px] text-[clamp(17px,1.6vw,20px)] leading-[1.6] text-muted">
-            Convert, format, generate and check — a growing collection of small,
-            focused utilities that run right in your browser. Pick a tool and
-            get the job done in seconds.
+            {t.home.intro}
           </p>
           <a
             href="#tools"
             className="mt-1.5 inline-flex min-h-12 items-center gap-2 rounded-xl bg-accent px-[22px] text-base font-semibold text-white transition hover:brightness-90"
           >
-            Browse all tools
+            {t.home.browse}
             <svg
               aria-hidden="true"
               width="18"
@@ -52,6 +53,7 @@ export default function HomePage() {
         {categories.map((category) => {
           const categoryTools = getToolsByCategory(category.id);
           if (categoryTools.length === 0) return null;
+          const { title, description } = t.categories[category.id];
 
           return (
             <section
@@ -64,13 +66,13 @@ export default function HomePage() {
                   id={`cat-${category.id}`}
                   className="text-[clamp(24px,2.6vw,30px)] font-extrabold tracking-[-0.015em]"
                 >
-                  {category.title}
+                  {title}
                 </h2>
-                <p className="text-base text-muted">{category.description}</p>
+                <p className="text-base text-muted">{description}</p>
               </div>
               <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-5">
                 {categoryTools.map((tool) => (
-                  <ToolCard key={tool.slug} tool={tool} />
+                  <ToolCard key={tool.slug} tool={tool} t={t} />
                 ))}
               </div>
             </section>

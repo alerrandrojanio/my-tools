@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { MouseEvent } from "react";
-
-const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "All Tools", href: "/#tools" },
-] as const;
+import { useI18n } from "@/i18n/provider";
+import { LanguageSwitcher } from "./language-switcher";
 
 export function Navbar() {
   const pathname = usePathname();
+  const { t } = useI18n();
+  const NAV_LINKS = [
+    { label: t.nav.home, href: "/" },
+    { label: t.nav.allTools, href: "/#tools" },
+  ] as const;
 
   // On the home page, links to "/" and "/#tools" scroll in place instead of navigating.
   function handleNavClick(event: MouseEvent<HTMLAnchorElement>, href: string) {
@@ -32,7 +34,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-surface/95 backdrop-blur">
       <nav
-        aria-label="Main"
+        aria-label={t.nav.label}
         className="mx-auto flex max-w-[1200px] flex-wrap items-center justify-between gap-3 px-[clamp(16px,4vw,32px)] py-3.5"
       >
         <Link
@@ -59,31 +61,34 @@ export function Navbar() {
             </svg>
           </span>
           <span className="text-[19px] font-extrabold tracking-tight">
-            My Tools
+            {t.site.name}
           </span>
         </Link>
 
-        <ul className="flex flex-wrap gap-1">
-          {NAV_LINKS.map(({ label, href }) => {
-            const isActive = pathname === href;
-            return (
-              <li key={href}>
-                <Link
-                  href={href}
-                  aria-current={isActive ? "page" : undefined}
-                  onClick={(event) => handleNavClick(event, href)}
-                  className={`inline-flex min-h-11 items-center rounded-[10px] px-3.5 text-[15px] transition hover:bg-surface-hover hover:text-ink ${
-                    isActive
-                      ? "bg-surface-hover font-semibold text-ink"
-                      : "font-medium text-muted"
-                  }`}
-                >
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-wrap items-center gap-2">
+          <ul className="flex flex-wrap gap-1">
+            {NAV_LINKS.map(({ label, href }) => {
+              const isActive = pathname === href;
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={(event) => handleNavClick(event, href)}
+                    className={`inline-flex min-h-11 items-center rounded-[10px] px-3.5 text-[15px] transition hover:bg-surface-hover hover:text-ink ${
+                      isActive
+                        ? "bg-surface-hover font-semibold text-ink"
+                        : "font-medium text-muted"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <LanguageSwitcher />
+        </div>
       </nav>
     </header>
   );

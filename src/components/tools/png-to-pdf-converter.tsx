@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useI18n } from "@/i18n/provider";
 import { layoutPage, type PageSizeMode } from "@/lib/pdf-builder";
 import {
   convertPngsToPdf,
@@ -18,19 +19,11 @@ interface QueuedFile {
 
 const SIZE_OPTIONS: readonly {
   id: PageSizeMode;
-  label: string;
-  hint: string;
+  label: "imageSize" | "a4";
+  hint: "imageSizeHint" | "a4Hint";
 }[] = [
-  {
-    id: "image",
-    label: "Image size",
-    hint: "Each page matches its image exactly.",
-  },
-  {
-    id: "a4",
-    label: "A4",
-    hint: "Portrait A4 pages, image centered with a 1 cm margin.",
-  },
+  { id: "image", label: "imageSize", hint: "imageSizeHint" },
+  { id: "a4", label: "a4", hint: "a4Hint" },
 ];
 
 const GHOST_BUTTON =
@@ -51,6 +44,7 @@ function PagePreview({
   index: number;
   mode: PageSizeMode;
 }) {
+  const { t } = useI18n();
   const layout = layoutPage(item, mode);
   const pct = (value: number, total: number) => `${(value / total) * 100}%`;
 
@@ -63,7 +57,7 @@ function PagePreview({
         {/* biome-ignore lint/performance/noImgElement: local blob preview, next/image can't optimize it */}
         <img
           src={item.previewUrl}
-          alt={`Page ${index + 1}: ${item.file.name}`}
+          alt={t.png.pageAlt(index + 1, item.file.name)}
           className="absolute"
           style={{
             left: pct(layout.x, layout.pageWidth),
@@ -73,12 +67,15 @@ function PagePreview({
           }}
         />
       </div>
-      <figcaption className="text-sm text-muted">Page {index + 1}</figcaption>
+      <figcaption className="text-sm text-muted">
+        {t.png.page(index + 1)}
+      </figcaption>
     </figure>
   );
 }
 
 export function PngToPdfConverter() {
+  const { t, tError } = useI18n();
   const [queue, setQueue] = useState<QueuedFile[]>([]);
   const [mode, setMode] = useState<PageSizeMode>("image");
   const [error, setError] = useState("");
@@ -101,7 +98,7 @@ export function PngToPdfConverter() {
     for (const file of Array.from(list)) {
       const problem = validatePngFile(file);
       if (problem) {
-        errors.push(problem);
+        errors.push(tError(problem));
         continue;
       }
       try {
@@ -114,7 +111,7 @@ export function PngToPdfConverter() {
           previewUrl: URL.createObjectURL(file),
         });
       } catch {
-        errors.push(`"${file.name}" could not be read as an image.`);
+        errors.push(t.png.unreadable(file.name));
       }
     }
 
@@ -161,8 +158,8 @@ export function PngToPdfConverter() {
     } catch (conversionError) {
       setError(
         conversionError instanceof Error
-          ? conversionError.message
-          : "Conversion failed.",
+          ? tError(conversionError.message)
+          : t.png.conversionFailed,
       );
     } finally {
       setBusy(false);
@@ -173,7 +170,7 @@ export function PngToPdfConverter() {
     <div className="flex flex-col gap-6 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
       <div className="flex flex-col gap-2">
         <label htmlFor="png-files" className="text-[15px] font-semibold">
-          PNG images
+          {t.png.images}
         </label>
         <input
           id="png-files"
@@ -188,14 +185,13 @@ export function PngToPdfConverter() {
           }}
           className="w-full cursor-pointer rounded-xl border border-dashed border-line-strong bg-canvas p-4 text-[15px] text-muted file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-[10px] file:border-0 file:bg-accent file:px-4.5 file:text-[15px] file:font-semibold file:text-white"
         />
-        <p className="text-sm text-muted">
-          Each image becomes one page, in the order listed. Transparent areas
-          are filled with white. Files never leave your browser.
-        </p>
+        <p className="text-sm text-muted">{t.png.hint}</p>
       </div>
 
       <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0">
-        <legend className="mb-1 text-[15px] font-semibold">Page size</legend>
+        <legend className="mb-1 text-[15px] font-semibold">
+          {t.png.pageSize}
+        </legend>
         <div className="flex flex-wrap gap-2">
           {SIZE_OPTIONS.map(({ id, label }) => (
             <button
@@ -209,12 +205,17 @@ export function PngToPdfConverter() {
                   : "border border-line-strong text-muted hover:bg-surface-hover hover:text-ink"
               }`}
             >
-              {label}
+              {t.png[label]}
             </button>
           ))}
         </div>
         <p className="text-sm text-muted">
-          {SIZE_OPTIONS.find((option) => option.id === mode)?.hint}
+          {
+            t.png[
+              SIZE_OPTIONS.find((option) => option.id === mode)?.hint ??
+                "imageSizeHint"
+            ]
+          }
         </p>
       </fieldset>
 
@@ -237,7 +238,7 @@ export function PngToPdfConverter() {
                     type="button"
                     onClick={() => move(index, -1)}
                     disabled={index === 0}
-                    aria-label={`Move ${item.file.name} up`}
+                    aria-label={t.png.moveUp(item.file.name)}
                     className={`${GHOST_BUTTON} px-3`}
                   >
                     ↑
@@ -246,7 +247,7 @@ export function PngToPdfConverter() {
                     type="button"
                     onClick={() => move(index, 1)}
                     disabled={index === queue.length - 1}
-                    aria-label={`Move ${item.file.name} down`}
+                    aria-label={t.png.moveDown(item.file.name)}
                     className={`${GHOST_BUTTON} px-3`}
                   >
                     ↓
@@ -254,10 +255,10 @@ export function PngToPdfConverter() {
                   <button
                     type="button"
                     onClick={() => remove(item.id)}
-                    aria-label={`Remove ${item.file.name}`}
+                    aria-label={t.png.removeFile(item.file.name)}
                     className={GHOST_BUTTON}
                   >
-                    Remove
+                    {t.common.remove}
                   </button>
                 </span>
               </li>
@@ -269,7 +270,7 @@ export function PngToPdfConverter() {
             className="flex flex-col gap-3"
           >
             <h2 id="preview-title" className="text-[15px] font-semibold">
-              Preview
+              {t.png.preview}
             </h2>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] items-end gap-5 rounded-xl border border-line-strong bg-canvas p-5">
               {queue.map((item, index) => (
@@ -296,7 +297,7 @@ export function PngToPdfConverter() {
           disabled={queue.length === 0 || busy}
           className="inline-flex min-h-11 items-center rounded-[10px] bg-accent px-4.5 text-[15px] font-semibold text-white transition hover:brightness-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {busy ? "Converting…" : "Convert and download PDF"}
+          {busy ? t.png.converting : t.png.convert}
         </button>
         <button
           type="button"
@@ -304,7 +305,7 @@ export function PngToPdfConverter() {
           disabled={queue.length === 0 || busy}
           className={GHOST_BUTTON}
         >
-          Clear all
+          {t.png.clearAll}
         </button>
       </div>
     </div>

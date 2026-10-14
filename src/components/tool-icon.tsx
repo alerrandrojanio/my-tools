@@ -55,6 +55,12 @@ const ICONS: Record<ToolIconName, ReactNode> = {
       <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
     </>
   ),
+  "trending-up": (
+    <>
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M15 7h6v6" />
+    </>
+  ),
   download: (
     <>
       <path d="M12 3v12" />
