@@ -171,6 +171,31 @@ export function computeStats(
 }
 
 /** Turns Yahoo's `/v8/finance/chart` payload into our own typed shape. */
+/**
+ * Keeps only the last `hours` of a chart and relabels it as 1D. Used when
+ * today's session has no prices yet (FX starts a new day at midnight London
+ * time, around 8–9 pm in Brazil), so 1D shows the last 24 hours instead of an
+ * error. The change is measured from the first point of that window.
+ */
+/** Error text when a chart has no usable prices (callers may fall back). */
+export const NO_PRICE_DATA = "No price data for this symbol.";
+
+export function lastHoursChart(
+  chart: ChartData,
+  hours: number,
+): ChartData | null {
+  if (chart.points.length === 0) return null;
+  const cutoff = chart.points[chart.points.length - 1].t - hours * 3_600_000;
+  const points = chart.points.filter((point) => point.t >= cutoff);
+  if (points.length === 0) return null;
+  return {
+    quote: { ...chart.quote, previousClose: null },
+    range: "1d",
+    points,
+    stats: computeStats(points, null),
+  };
+}
+
 export function parseYahooChart(
   json: unknown,
   rangeId: RangeId,
@@ -198,7 +223,7 @@ export function parseYahooChart(
     : null;
   const closes = isRecord(quoteSeries) ? quoteSeries.close : null;
   if (!Array.isArray(timestamps) || !Array.isArray(closes)) {
-    return { ok: false, error: "No price data for this symbol." };
+    return { ok: false, error: NO_PRICE_DATA };
   }
 
   let points: ChartPoint[] = [];
@@ -214,7 +239,7 @@ export function parseYahooChart(
     points = points.filter((point) => point.t >= cutoff);
   }
   if (points.length === 0) {
-    return { ok: false, error: "No price data for this symbol." };
+    return { ok: false, error: NO_PRICE_DATA };
   }
 
   const symbol = asString(meta.symbol);

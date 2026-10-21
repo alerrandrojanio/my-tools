@@ -79,6 +79,11 @@ export const pt: Dictionary = {
       description:
         "Transforme um Base64 ou data URI de volta em um arquivo para baixar, com pré-visualização.",
     },
+    "markdown-to-pdf": {
+      name: "Markdown para PDF",
+      description:
+        "Transforme um arquivo .md ou um texto em Markdown em um PDF limpo, com texto selecionável e pré-visualização ao vivo.",
+    },
     "word-counter": {
       name: "Contador de Palavras",
       description:
@@ -153,6 +158,25 @@ export const pt: Dictionary = {
     size: "Tamanho",
     preview: (name) => `Pré-visualização de ${name}`,
     download: "Baixar arquivo",
+  },
+
+  mdPdf: {
+    upload: "Arquivo Markdown",
+    uploadHint:
+      "Escolha ou arraste um arquivo .md (até 2 MB), ou digite na caixa abaixo.",
+    input: "Markdown",
+    placeholder: "# Título\n\nEscreva em **Markdown** aqui…",
+    preview: "Pré-visualização",
+    previewEmpty: "A pré-visualização aparece aqui enquanto você digita.",
+    fileName: "Nome do arquivo PDF",
+    defaultName: "documento",
+    pageSize: "Tamanho da página",
+    letter: "Carta",
+    download: "Gerar e baixar PDF",
+    generating: "Gerando…",
+    failed: "Não foi possível gerar o PDF. Tente novamente.",
+    readFailed: (name) => `"${name}" não pôde ser lido.`,
+    note: "O PDF é criado no seu navegador; nada é enviado. Imagens e emoji não são incluídos, e HTML puro é ignorado.",
   },
 
   wordCounter: {
@@ -375,6 +399,13 @@ export const pt: Dictionary = {
     active: "ativo",
     triggered: "disparado",
     removeLabel: (name) => `Remover alerta de ${name}`,
+    telegramOption: "Avisar também no Telegram",
+    telegramHint:
+      "Gratuito. Você vai abrir o bot do My Tools no Telegram e tocar em Iniciar para conectar este navegador.",
+    telegramOpen: "Abrir o Telegram",
+    telegramWaiting: "Aguardando você tocar em Iniciar no Telegram…",
+    telegramLinked: "Conectado: seus alertas também chegam no Telegram.",
+    telegramUnlinked: "Telegram desconectado.",
   },
 
   errors: {
@@ -440,6 +471,14 @@ export const pt: Dictionary = {
       "URLs with credentials are not allowed.":
         "URLs com usuário e senha não são permitidas.",
       "Unknown list.": "Lista desconhecida.",
+      "Telegram is not configured on the server.":
+        "O Telegram não está configurado no servidor.",
+      "Could not create the Telegram link. Try again later.":
+        "Não foi possível criar o link do Telegram. Tente mais tarde.",
+      "Could not load the Telegram status. Try again later.":
+        "Não foi possível verificar o Telegram. Tente mais tarde.",
+      "Could not unlink Telegram. Try again later.":
+        "Não foi possível desconectar o Telegram. Tente mais tarde.",
     },
     patterns: [
       [
@@ -462,6 +501,10 @@ export const pt: Dictionary = {
       [
         /^You can have up to (\d+) alerts on one device\.$/,
         (n) => `Você pode ter até ${n} alertas por dispositivo.`,
+      ],
+      [
+        /^"(.*)" is not a Markdown file\.$/,
+        (name) => `"${name}" não é um arquivo Markdown.`,
       ],
       [
         /^"(.*)" is not a PNG image\.$/,

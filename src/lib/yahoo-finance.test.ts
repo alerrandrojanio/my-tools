@@ -52,6 +52,77 @@ function requestedUrl(call = 0): URL {
   return new URL(String(fetchMock.mock.calls[call][0]));
 }
 
+describe("getChart: new trading day with no prices yet", () => {
+  const HOUR = 3600;
+  const emptyDay = {
+    chart: {
+      result: [
+        {
+          meta: {
+            symbol: "USDBRL=X",
+            currency: "BRL",
+            regularMarketPrice: 5.05,
+          },
+          timestamp: [],
+          indicators: { quote: [{ close: [] }] },
+        },
+      ],
+      error: null,
+    },
+  };
+  // 30 hours of hourly prices, the newest last.
+  const lastDays = {
+    chart: {
+      result: [
+        {
+          meta: {
+            symbol: "USDBRL=X",
+            currency: "BRL",
+            regularMarketPrice: 5.05,
+          },
+          timestamp: Array.from({ length: 31 }, (_, i) => BASE_TS + i * HOUR),
+          indicators: {
+            quote: [
+              { close: Array.from({ length: 31 }, (_, i) => 5 + i / 1000) },
+            ],
+          },
+        },
+      ],
+      error: null,
+    },
+  };
+
+  it("falls back to the last 24 hours instead of failing", async () => {
+    fetchMock
+      .mockResolvedValueOnce(ok(emptyDay))
+      .mockResolvedValueOnce(ok(lastDays));
+    const data = await getChart("USDBRL=X", "1d");
+
+    expect(requestedUrl(1).searchParams.get("range")).toBe("5d");
+    expect(requestedUrl(1).searchParams.get("interval")).toBe("5m");
+    expect(data.range).toBe("1d");
+    expect(data.points).toHaveLength(25); // 24 h window, both ends included
+    expect(data.points[0].t).toBe((BASE_TS + 6 * HOUR) * 1000);
+    expect(data.stats.first).toBeCloseTo(5.006, 6);
+    expect(data.quote.previousClose).toBeNull();
+  });
+
+  it("still reports the error when the fallback has no prices either", async () => {
+    fetchMock.mockImplementation(async () => ok(emptyDay));
+    await expect(getChart("USDBRL=X", "1d")).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+
+  it("does not fall back for other ranges", async () => {
+    fetchMock.mockImplementation(async () => ok(emptyDay));
+    await expect(getChart("USDBRL=X", "5d")).rejects.toBeInstanceOf(
+      MarketDataError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("getChart", () => {
   it("requests the right range and interval, with the symbol URL-encoded", async () => {
     fetchMock.mockResolvedValue(ok(chartJson()));

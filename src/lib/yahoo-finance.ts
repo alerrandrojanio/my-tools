@@ -1,6 +1,8 @@
 import {
   type ChartData,
   getRange,
+  lastHoursChart,
+  NO_PRICE_DATA,
   parseYahooChart,
   parseYahooSearch,
   type Quote,
@@ -120,8 +122,18 @@ async function loadChart(
 ): Promise<ChartData> {
   const json = await fetchJson(chartUrl(symbol, yahooRange, interval));
   const parsed = parseYahooChart(json, rangeId);
-  if (!parsed.ok) throw new MarketDataError(parsed.error, 404);
-  return parsed.value;
+  if (parsed.ok) return parsed.value;
+
+  // A new trading day with no prices yet: show the last 24 hours instead.
+  if (rangeId === "1d" && parsed.error === NO_PRICE_DATA) {
+    const recent = parseYahooChart(
+      await fetchJson(chartUrl(symbol, "5d", "5m")),
+      "5d",
+    );
+    const fallback = recent.ok ? lastHoursChart(recent.value, 24) : null;
+    if (fallback) return fallback;
+  }
+  throw new MarketDataError(parsed.error, 404);
 }
 
 /** Price history for a symbol. `symbol` must already be validated. */

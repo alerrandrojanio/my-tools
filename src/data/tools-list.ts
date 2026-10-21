@@ -29,6 +29,13 @@ export const tools: readonly Tool[] = [
     available: true,
   },
   {
+    slug: "markdown-to-pdf",
+    categoryId: "text-and-data",
+    icon: "file",
+    href: "/tools/markdown-to-pdf",
+    available: true,
+  },
+  {
     slug: "word-counter",
     categoryId: "text-and-data",
     icon: "text-lines",

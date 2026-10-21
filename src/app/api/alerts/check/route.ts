@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    return NextResponse.json(await runAlertCheck());
+    return NextResponse.json(await runAlertCheck(new URL(request.url).origin));
   } catch (error) {
     console.error("[alerts] check", error);
     return jsonError("The alert check failed.", 500);

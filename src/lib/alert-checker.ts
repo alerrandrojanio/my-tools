@@ -1,9 +1,11 @@
 import {
   deleteDevice,
   getDevice,
+  getTelegramChat,
   listAlerts,
   listDeviceIds,
   markTriggered,
+  removeTelegramChat,
 } from "./alert-store";
 import {
   buildAlertPayload,
@@ -11,12 +13,15 @@ import {
   type PriceAlert,
 } from "./alert-utils";
 import { sendPush } from "./push-send";
+import { buildTelegramText, sendTelegramMessage } from "./telegram";
 import { getQuote } from "./yahoo-finance";
 
 export interface CheckSummary {
   devices: number;
   checked: number;
   sent: number;
+  /** Alerts also delivered to Telegram. */
+  telegram: number;
   removedDevices: number;
 }
 
@@ -26,11 +31,15 @@ const MAX_SYMBOLS_PER_RUN = 100;
  * Evaluates every active alert once. A triggered alert is delivered to its own
  * device only, then marked as triggered so it does not fire again.
  */
-export async function runAlertCheck(): Promise<CheckSummary> {
+export async function runAlertCheck(
+  /** Site address, used to put a link in Telegram messages. */
+  origin: string | null = null,
+): Promise<CheckSummary> {
   const summary: CheckSummary = {
     devices: 0,
     checked: 0,
     sent: 0,
+    telegram: 0,
     removedDevices: 0,
   };
 
@@ -84,15 +93,24 @@ export async function runAlertCheck(): Promise<CheckSummary> {
     );
     const result = await sendPush(device.subscription, payload);
 
-    if (result === "sent") {
+    const chatId = await getTelegramChat(deviceId);
+    const telegram =
+      chatId === null
+        ? null
+        : await sendTelegramMessage(chatId, buildTelegramText(payload, origin));
+    if (telegram === "gone") await removeTelegramChat(deviceId);
+    if (telegram === "sent") summary.telegram++;
+
+    if (result === "sent" || telegram === "sent") {
       await markTriggered(deviceId, alert);
       summary.sent++;
-    } else if (result === "gone") {
+    }
+    if (result === "gone") {
       await deleteDevice(deviceId);
       removed.add(deviceId);
       summary.removedDevices++;
     }
-    // "failed": leave the alert active so the next run retries it.
+    // Nothing delivered: leave the alert active so the next run retries it.
   }
 
   return summary;

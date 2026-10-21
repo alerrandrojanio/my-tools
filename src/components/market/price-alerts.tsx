@@ -140,6 +140,122 @@ function BellIcon() {
   );
 }
 
+const TELEGRAM_POLL_MS = 3000;
+/** Matches the server's link-token lifetime. */
+const TELEGRAM_WAIT_MS = 15 * 60_000;
+
+/**
+ * "Also notify me on Telegram": creates a one-time link to the bot, then waits
+ * for the user to tap Start there. Hidden when the server has no bot.
+ */
+function TelegramOption() {
+  const { t, tError } = useI18n();
+  const [configured, setConfigured] = useState(false);
+  const [linked, setLinked] = useState(false);
+  const [linkUrl, setLinkUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const refresh = useCallback(async () => {
+    const result = await api<{ configured: boolean; linked: boolean }>(
+      `/api/alerts/telegram?deviceId=${encodeURIComponent(getDeviceId())}`,
+    );
+    if (!result.ok) return false;
+    setConfigured(result.data.configured);
+    setLinked(result.data.linked);
+    return result.data.linked;
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  // While a link is pending, check every few seconds whether Start was tapped.
+  useEffect(() => {
+    if (!linkUrl || linked) return;
+    const startedAt = Date.now();
+    const timer = setInterval(async () => {
+      if (Date.now() - startedAt > TELEGRAM_WAIT_MS) {
+        clearInterval(timer);
+        setLinkUrl(null);
+        return;
+      }
+      if (await refresh()) {
+        clearInterval(timer);
+        setLinkUrl(null);
+        setMessage(t.alerts.telegramLinked);
+      }
+    }, TELEGRAM_POLL_MS);
+    return () => clearInterval(timer);
+  }, [linkUrl, linked, refresh, t.alerts.telegramLinked]);
+
+  async function toggle(checked: boolean) {
+    setBusy(true);
+    setMessage("");
+    if (checked) {
+      const result = await api<{ url: string }>("/api/alerts/telegram", {
+        method: "POST",
+        body: JSON.stringify({ deviceId: getDeviceId() }),
+      });
+      if (result.ok) setLinkUrl(result.data.url);
+      else setMessage(tError(result.error));
+    } else {
+      const result = await api(
+        `/api/alerts/telegram?deviceId=${encodeURIComponent(getDeviceId())}`,
+        { method: "DELETE" },
+      );
+      if (result.ok) {
+        setLinked(false);
+        setLinkUrl(null);
+        setMessage(t.alerts.telegramUnlinked);
+      } else {
+        setMessage(tError(result.error));
+      }
+    }
+    setBusy(false);
+  }
+
+  if (!configured) return null;
+
+  return (
+    <div className="flex flex-col gap-2 rounded-xl border border-line-strong bg-canvas p-3">
+      <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[15px] font-semibold">
+        <input
+          type="checkbox"
+          checked={linked || linkUrl !== null}
+          disabled={busy}
+          onChange={(event) => toggle(event.target.checked)}
+          className="size-4.5 accent-accent"
+        />
+        {t.alerts.telegramOption}
+      </label>
+
+      {!linked && !linkUrl && (
+        <p className="text-sm text-muted">{t.alerts.telegramHint}</p>
+      )}
+
+      {linkUrl && !linked && (
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href={linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 items-center rounded-[10px] bg-[#229ED9] px-4 text-[15px] font-semibold text-white transition hover:brightness-90"
+          >
+            {t.alerts.telegramOpen}
+          </a>
+          <span className="text-sm text-muted">{t.alerts.telegramWaiting}</span>
+        </div>
+      )}
+
+      {linked && <p className="text-sm text-up">{t.alerts.telegramLinked}</p>}
+      {message && !linked && (
+        <output className="block text-sm text-muted">{message}</output>
+      )}
+    </div>
+  );
+}
+
 export function PriceAlerts({ quote }: PriceAlertsProps) {
   const { t, tError } = useI18n();
   const { formatTarget } = useFormatters();
@@ -545,6 +661,8 @@ export function PriceAlerts({ quote }: PriceAlertsProps) {
                 alerts={others}
                 onRemove={removeAlert}
               />
+
+              <TelegramOption />
 
               <div className="flex flex-wrap gap-2 border-t border-line pt-4">
                 <button

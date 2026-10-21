@@ -25,6 +25,7 @@ export interface ToolCategory {
 export type ToolSlug =
   | "base64-converter"
   | "base64-to-file"
+  | "markdown-to-pdf"
   | "word-counter"
   | "password-generator"
   | "png-to-pdf"

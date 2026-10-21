@@ -4,11 +4,14 @@ import { runAlertCheck } from "./alert-checker";
 import {
   addAlert,
   getDevice,
+  getTelegramChat,
   listAlerts,
   listDeviceIds,
   saveDevice,
+  setTelegramChat,
 } from "./alert-store";
 import { sendPush } from "./push-send";
+import { sendTelegramMessage } from "./telegram";
 import { getQuote } from "./yahoo-finance";
 
 vi.mock("./redis-connection", async () => {
@@ -20,6 +23,10 @@ vi.mock("./push-send", () => ({
   isPushConfigured: () => true,
 }));
 vi.mock("./yahoo-finance", () => ({ getQuote: vi.fn() }));
+vi.mock("./telegram", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./telegram")>();
+  return { ...actual, sendTelegramMessage: vi.fn() };
+});
 
 const ME = "11111111-1111-1111-1111-111111111111";
 const OTHER = "22222222-2222-2222-2222-222222222222";
@@ -57,6 +64,7 @@ const input = (over = {}) => ({
 beforeEach(async () => {
   fakeRedis.reset();
   vi.mocked(sendPush).mockReset().mockResolvedValue("sent");
+  vi.mocked(sendTelegramMessage).mockReset().mockResolvedValue("sent");
   prices({ AAPL: [345, "USD"], "USDBRL=X": [5, "BRL"] });
   await saveDevice(ME, "DESKTOP-ALE", sub("me"));
   await saveDevice(OTHER, "LAPTOP-BOB", sub("other"));
@@ -141,5 +149,55 @@ describe("runAlertCheck", () => {
   it("does nothing without active alerts", async () => {
     expect(await runAlertCheck()).toMatchObject({ checked: 0, sent: 0 });
     expect(getQuote).not.toHaveBeenCalled();
+  });
+
+  describe("Telegram", () => {
+    it("also sends to the device's Telegram chat, with a link to the site", async () => {
+      await setTelegramChat(ME, 777);
+      await addAlert(ME, input());
+      const summary = await runAlertCheck("https://site.test");
+
+      expect(summary).toMatchObject({ sent: 1, telegram: 1 });
+      const [chatId, text] = vi.mocked(sendTelegramMessage).mock.calls[0];
+      expect(chatId).toBe(777);
+      expect(text).toContain("Apple rose above");
+      expect(text).toContain(
+        "https://site.test/tools/market-quotes?symbol=AAPL",
+      );
+    });
+
+    it("never sends to another device's chat", async () => {
+      await setTelegramChat(OTHER, 999);
+      await addAlert(ME, input());
+      await runAlertCheck();
+      expect(sendTelegramMessage).not.toHaveBeenCalled();
+    });
+
+    it("counts the alert as delivered when only Telegram worked", async () => {
+      vi.mocked(sendPush).mockResolvedValue("failed");
+      await setTelegramChat(ME, 777);
+      await addAlert(ME, input());
+      expect((await runAlertCheck()).sent).toBe(1);
+      expect((await listAlerts(ME))[0].triggeredAt).not.toBeNull();
+    });
+
+    it("unlinks a chat that blocked the bot, keeping push working", async () => {
+      vi.mocked(sendTelegramMessage).mockResolvedValue("gone");
+      await setTelegramChat(ME, 777);
+      await addAlert(ME, input());
+      const summary = await runAlertCheck();
+      expect(summary.sent).toBe(1);
+      expect(await getTelegramChat(ME)).toBeNull();
+      expect(await getDevice(ME)).not.toBeNull();
+    });
+
+    it("retries next time when neither channel delivered", async () => {
+      vi.mocked(sendPush).mockResolvedValue("failed");
+      vi.mocked(sendTelegramMessage).mockResolvedValue("failed");
+      await setTelegramChat(ME, 777);
+      await addAlert(ME, input());
+      expect((await runAlertCheck()).sent).toBe(0);
+      expect((await listAlerts(ME))[0].triggeredAt).toBeNull();
+    });
   });
 });

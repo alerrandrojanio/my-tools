@@ -80,6 +80,11 @@ export const en = {
       description:
         "Turn a Base64 string or data URI back into a downloadable file, with a preview.",
     },
+    "markdown-to-pdf": {
+      name: "Markdown to PDF",
+      description:
+        "Turn a .md file or pasted Markdown into a clean, selectable-text PDF, with a live preview.",
+    },
     "word-counter": {
       name: "Word Counter",
       description:
@@ -153,6 +158,25 @@ export const en = {
     size: "Size",
     preview: (name: string) => `Preview of ${name}`,
     download: "Download file",
+  },
+
+  mdPdf: {
+    upload: "Markdown file",
+    uploadHint:
+      "Choose or drop a .md file (up to 2 MB), or type in the box below.",
+    input: "Markdown",
+    placeholder: "# Title\n\nWrite **Markdown** here…",
+    preview: "Preview",
+    previewEmpty: "The preview appears here as you type.",
+    fileName: "PDF file name",
+    defaultName: "document",
+    pageSize: "Page size",
+    letter: "Letter",
+    download: "Generate and download PDF",
+    generating: "Generating…",
+    failed: "Could not generate the PDF. Try again.",
+    readFailed: (name: string) => `"${name}" could not be read.`,
+    note: "The PDF is created in your browser; nothing is uploaded. Images and emoji are not embedded, and raw HTML is ignored.",
   },
 
   wordCounter: {
@@ -376,6 +400,13 @@ export const en = {
     active: "active",
     triggered: "triggered",
     removeLabel: (name: string) => `Remove alert for ${name}`,
+    telegramOption: "Also notify me on Telegram",
+    telegramHint:
+      "Free. You will open the My Tools bot in Telegram and tap Start to connect this browser.",
+    telegramOpen: "Open Telegram",
+    telegramWaiting: "Waiting for you to tap Start in Telegram…",
+    telegramLinked: "Connected: your alerts also arrive in Telegram.",
+    telegramUnlinked: "Telegram disconnected.",
   },
 
   /**

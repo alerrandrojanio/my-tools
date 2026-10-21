@@ -33,11 +33,66 @@ export async function getDevice(deviceId: string): Promise<Device | null> {
   return raw ? (JSON.parse(raw) as Device) : null;
 }
 
-/** Removes the device, its subscription and all of its alerts. */
+/** Removes the device, its subscription, its Telegram link and all of its alerts. */
 export async function deleteDevice(deviceId: string): Promise<void> {
   const client = await redisConnection.getClient();
-  await client.del([deviceKey(deviceId), itemsKey(deviceId)]);
+  await client.del([
+    deviceKey(deviceId),
+    itemsKey(deviceId),
+    telegramKey(deviceId),
+  ]);
   await client.sRem(DEVICES_SET, deviceId);
+}
+
+// ---- Telegram ----
+
+const telegramKey = (id: string) => `alerts:telegram:${id}`;
+const linkTokenKey = (token: string) => `alerts:tglink:${token}`;
+/** A link from the site to the bot is valid for 15 minutes. */
+const LINK_TOKEN_TTL_SECONDS = 15 * 60;
+
+/** One-time token that ties a "/start <token>" in Telegram to this device. */
+export async function createTelegramLinkToken(
+  deviceId: string,
+): Promise<string> {
+  const client = await redisConnection.getClient();
+  const token = crypto.randomUUID().replace(/-/g, "");
+  await client.set(linkTokenKey(token), deviceId, {
+    EX: LINK_TOKEN_TTL_SECONDS,
+  });
+  return token;
+}
+
+/** Returns the device the token was issued for and invalidates the token. */
+export async function consumeTelegramLinkToken(
+  token: string,
+): Promise<string | null> {
+  const client = await redisConnection.getClient();
+  const deviceId = await client.get(linkTokenKey(token));
+  if (deviceId) await client.del([linkTokenKey(token)]);
+  return deviceId;
+}
+
+export async function setTelegramChat(
+  deviceId: string,
+  chatId: number,
+): Promise<void> {
+  const client = await redisConnection.getClient();
+  await client.set(telegramKey(deviceId), String(chatId));
+}
+
+export async function getTelegramChat(
+  deviceId: string,
+): Promise<number | null> {
+  const client = await redisConnection.getClient();
+  const raw = await client.get(telegramKey(deviceId));
+  const chatId = raw === null ? Number.NaN : Number(raw);
+  return Number.isSafeInteger(chatId) ? chatId : null;
+}
+
+export async function removeTelegramChat(deviceId: string): Promise<void> {
+  const client = await redisConnection.getClient();
+  await client.del([telegramKey(deviceId)]);
 }
 
 export async function listAlerts(deviceId: string): Promise<PriceAlert[]> {
