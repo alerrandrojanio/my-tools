@@ -68,6 +68,23 @@ const ICONS: Record<ToolIconName, ReactNode> = {
       <path d="M5 21h14" />
     </>
   ),
+  compress: (
+    <>
+      <path d="M4 14h6v6" />
+      <path d="M20 10h-6V4" />
+      <path d="M14 10l7-7" />
+      <path d="M3 21l7-7" />
+    </>
+  ),
+  diff: (
+    <>
+      <rect x="3" y="4" width="8" height="16" rx="1.5" />
+      <rect x="13" y="4" width="8" height="16" rx="1.5" />
+      <path d="M5.5 10h3" />
+      <path d="M15.5 10h3" />
+      <path d="M17 8.5v3" />
+    </>
+  ),
   "id-card": (
     <>
       <rect x="3" y="5" width="18" height="14" rx="2" />

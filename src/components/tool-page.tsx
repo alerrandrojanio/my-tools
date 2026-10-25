@@ -11,19 +11,26 @@ export async function toolMetadata(slug: ToolSlug): Promise<Metadata> {
   return { title: name, description };
 }
 
-/** Shared frame of every tool page: back link, title, description, tool. */
+/**
+ * Shared frame of every tool page: back link, title, description, tool.
+ * `wide` gives tools that show two documents side by side more room.
+ */
 export async function ToolPage({
   slug,
+  wide = false,
   children,
 }: {
   slug: ToolSlug;
+  wide?: boolean;
   children: ReactNode;
 }) {
   const { t } = await getTranslations();
   const { name, description } = t.tools[slug];
 
   return (
-    <div className="mx-auto flex max-w-[1200px] flex-col gap-8 px-[clamp(16px,4vw,32px)] py-[clamp(32px,5vw,56px)]">
+    <div
+      className={`mx-auto flex ${wide ? "max-w-[1680px]" : "max-w-[1200px]"} flex-col gap-8 px-[clamp(16px,4vw,32px)] py-[clamp(32px,5vw,56px)]`}
+    >
       <div className="flex flex-col items-start gap-4">
         <Link
           href="/#tools"

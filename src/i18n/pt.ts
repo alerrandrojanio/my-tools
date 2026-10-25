@@ -14,6 +14,7 @@ export const pt: Dictionary = {
     label: "Principal",
     home: "Início",
     allTools: "Ferramentas",
+    about: "Sobre",
     language: "Idioma",
     switchTo: "Switch to English",
   },
@@ -84,6 +85,11 @@ export const pt: Dictionary = {
       description:
         "Transforme um arquivo .md ou um texto em Markdown em um PDF limpo, com texto selecionável e pré-visualização ao vivo.",
     },
+    "text-diff": {
+      name: "Comparar Textos",
+      description:
+        "Compare dois textos lado a lado: o que foi removido aparece em vermelho e o que foi adicionado, em verde.",
+    },
     "word-counter": {
       name: "Contador de Palavras",
       description:
@@ -98,6 +104,11 @@ export const pt: Dictionary = {
       name: "Conversor de PNG para PDF",
       description:
         "Junte uma ou mais imagens PNG em um único arquivo PDF fácil de compartilhar.",
+    },
+    "pdf-compressor": {
+      name: "Compressor de PDF",
+      description:
+        "Diminua o tamanho de um PDF recomprimindo as imagens, sem enviar o arquivo para lugar nenhum.",
     },
     "qr-code-generator": {
       name: "Gerador de QR Code",
@@ -408,8 +419,214 @@ export const pt: Dictionary = {
     telegramUnlinked: "Telegram desconectado.",
   },
 
+  qr: {
+    contentType: "Conteúdo",
+    text: "Texto ou link",
+    wifi: "Wi-Fi",
+    textPlaceholder: "https://exemplo.com",
+    ssid: "Nome da rede (SSID)",
+    password: "Senha",
+    security: "Segurança",
+    wpa: "WPA/WPA2/WPA3",
+    wep: "WEP",
+    open: "Sem senha",
+    hidden: "Rede oculta",
+    wifiHint:
+      "Ao escanear o código, o celular oferece entrar na rede, sem precisar digitar a senha.",
+    level: "Correção de erros",
+    levels: {
+      L: "Baixa (7%)",
+      M: "Média (15%)",
+      Q: "Alta (25%)",
+      H: "Máxima (30%)",
+    },
+    levelHint:
+      "Níveis maiores continuam funcionando com parte do código riscada ou coberta por um logo, mas deixam o código mais denso.",
+    foreground: "Cor do código",
+    background: "Fundo",
+    lowContrast: "Contraste baixo: alguns celulares podem não ler este código.",
+    inverted:
+      "Código claro em fundo escuro: alguns leitores não conseguem ler códigos invertidos.",
+    pngSize: "Tamanho do PNG",
+    preview: "Pré-visualização",
+    previewEmpty: "Digite algo para ver o QR code.",
+    previewAlt: "Pré-visualização do QR code",
+    info: (version, modules, chars) =>
+      `Versão ${version} · ${modules}×${modules} módulos · ${chars} ${chars === 1 ? "caractere" : "caracteres"}`,
+    downloadPng: "Baixar PNG",
+    downloadSvg: "Baixar SVG",
+    failed: "Não foi possível criar a imagem.",
+    note: "O código é gerado no seu navegador e nada é enviado. Ele nunca expira: o conteúdo fica gravado na própria imagem.",
+  },
+
+  color: {
+    picker: "Escolher uma cor",
+    random: "Cor aleatória",
+    invalidHex: "Use 3 ou 6 dígitos hexadecimais, como #7c3aed ou #f80.",
+    invalidRgb: "Use três números de 0 a 255, como rgb(124, 58, 237).",
+    invalidHsl:
+      "Use um matiz (0–360) e duas porcentagens, como hsl(262, 83%, 58%).",
+    copyLabel: (format) => `Copiar ${format}`,
+    contrastTitle: "Contraste de texto (WCAG)",
+    whiteText: "Texto branco",
+    blackText: "Texto preto",
+    sample: "Texto de exemplo",
+    levelAAA: "AAA · excelente",
+    levelAA: "AA · bom",
+    levelFail: "Baixo demais para texto corrido",
+    shades: "Tons",
+    shadeLabel: (hex) => `Usar ${hex}`,
+    note: "As cores são convertidas no seu navegador. O HSL aparece em números inteiros, então digitá-lo de volta pode mudar um canal RGB em uma unidade.",
+  },
+
+  pdfCompress: {
+    file: "Arquivo PDF",
+    hint: "Escolha um PDF (até 100 MB). Ele é processado no seu navegador e nunca é enviado.",
+    images: "Imagens",
+    recompress: "Recomprimir",
+    recompressHint:
+      "Fotos e digitalizações são regravadas como JPEG. Textos, fontes e desenhos continuam nítidos.",
+    keep: "Manter",
+    keepHint:
+      "As imagens ficam intactas; só a estrutura do arquivo é enxugada. Sem perda de qualidade, mas costuma economizar menos.",
+    quality: "Qualidade do JPEG",
+    qualityHint:
+      "Valores menores geram arquivos menores, com mais borrões visíveis. Entre 60 e 75 é um bom equilíbrio.",
+    maxSize: "Tamanho máximo das imagens",
+    maxSizeHint:
+      "Maior lado de cada imagem, em pixels. 1600 basta para ler na tela; use Original para imprimir.",
+    full: "Original",
+    compress: "Comprimir",
+    compressing: "Comprimindo…",
+    progress: (done, total) => `Processando imagem ${done} de ${total}…`,
+    original: "Original",
+    compressed: "Comprimido",
+    smaller: (percent) => `${percent} menor`,
+    imagesSummary: (recompressed, total) =>
+      total === 0
+        ? "Nenhuma imagem encontrada; só a estrutura do arquivo foi comprimida."
+        : `${recompressed} de ${total} ${total === 1 ? "imagem recomprimida" : "imagens recomprimidas"}.`,
+    unchanged:
+      "Este PDF já está compacto: o resultado não ficou menor, então o original foi mantido. Tente uma qualidade menor ou um tamanho máximo menor.",
+    download: "Baixar PDF",
+    failed: "Não foi possível comprimir este PDF.",
+    note: "Documentos digitalizados e PDFs com muitas fotos são os que mais diminuem; PDFs só de texto diminuem pouco. PDFs protegidos por senha não são suportados.",
+  },
+
+  textDiff: {
+    original: "Original",
+    modified: "Modificado",
+    placeholder: "Cole um código ou texto, ou abra um arquivo…",
+    openFile: "Abrir arquivo",
+    openFileLabel: (side) => `Abrir um arquivo como texto ${side}`,
+    fileTooLarge: (name) => `"${name}" tem mais de 5 MB.`,
+    readFailed: (name) => `"${name}" não pôde ser lido como texto.`,
+    lineCount: (n) => (n === 1 ? "1 linha" : `${n} linhas`),
+    compareBy: "Comparar por",
+    chars: "Caracteres",
+    words: "Palavras",
+    lines: "Linhas",
+    swap: "Inverter textos",
+    options: "Opções",
+    ignoreWhitespace: "Ignorar espaços",
+    ignoreWhitespaceHint:
+      "Indentação e quantidade de espaços ou tabs não contam como mudança.",
+    wrap: "Quebrar linhas longas",
+    syncScroll: "Rolar juntos",
+    previous: "Diferença anterior",
+    next: "Próxima diferença",
+    position: (current, total) => `Diferença ${current} de ${total}`,
+    total: (n) => (n === 1 ? "1 diferença" : `${n} diferenças`),
+    removedCount: (n) => `${n} ${n === 1 ? "remoção" : "remoções"}`,
+    addedCount: (n) => `${n} ${n === 1 ? "adição" : "adições"}`,
+    identical: "Os textos são idênticos.",
+    empty: "Digite ou cole um texto em cada lado para comparar.",
+    fellBack: (mode) =>
+      `Diferenças demais para esse nível de detalhe, então os textos foram comparados por ${mode}.`,
+    legendRemoved: "Removido do original",
+    legendAdded: "Adicionado no texto modificado",
+    note: "A comparação é feita no seu navegador; seus textos e arquivos nunca são enviados. Linhas alteradas ficam destacadas e marcadas com − ou + ao lado do número.",
+  },
+
+  about: {
+    title: "Sobre",
+    description:
+      "Quais ferramentas funcionam inteiramente no navegador, quais usam o servidor e o que guardam, e as tecnologias por trás do site.",
+    intro:
+      "O My Tools é uma coleção de pequenos utilitários. A maioria faz todo o trabalho no seu dispositivo, então seus textos e arquivos não saem dele. Algumas precisam do servidor, e esta página explica exatamente o que elas enviam e o que fica guardado.",
+    browserTitle: "Funcionam inteiramente no navegador",
+    browserIntro:
+      "Nada do que você digita ou abre nestas ferramentas é enviado ao servidor ou guardado. A página só baixa o código de que precisa (e, no Markdown para PDF, as fontes).",
+    serverTitle: "Usam o servidor",
+    serverIntro:
+      "Estas ferramentas precisam do servidor, seja para buscar dados em outro serviço, seja para guardar algo para você.",
+    sends: "Enviado ao servidor",
+    stores: "Guardado",
+    server: {
+      "url-shortener": {
+        sends: "O link longo que você quer encurtar.",
+        stores:
+          "O link e o código curto, sem prazo de validade, para o link curto continuar funcionando. Seu endereço IP é usado como contador de requisições que expira em um minuto, para evitar abuso.",
+      },
+      "market-quotes": {
+        sends:
+          "Os símbolos que você consulta e suas pesquisas. O servidor busca os preços no Yahoo Finance para você.",
+        stores:
+          "Nada sobre você, além do mesmo contador de requisições de um minuto ligado ao seu IP.",
+      },
+      alerts: {
+        name: "Alertas de preço (em Cotações do Mercado)",
+        sends:
+          "Os alertas que você cria e o endereço de notificações push deste navegador.",
+        stores:
+          "Seus alertas, o endereço push e um ID aleatório deste navegador, até você desativar as notificações. Se você conectar o Telegram, também o ID do seu chat. Uma tarefa agendada confere os preços a cada 5 minutos.",
+      },
+    },
+    localTitle: "Guardado no seu navegador",
+    localIntro:
+      "Algumas preferências ficam no seu dispositivo e podem ser apagadas limpando os dados do site no navegador:",
+    localLanguage:
+      "O idioma escolhido (um cookie chamado “lang”, guardado por um ano).",
+    localAlerts:
+      "O ID aleatório deste navegador para os alertas de preço (armazenamento local), só se você ativar os alertas.",
+    techTitle: "Tecnologias",
+    techIntro:
+      "O site é feito com ferramentas de código aberto e APIs padrão da web.",
+    tech: {
+      next: "Páginas, renderização no servidor e as rotas de API.",
+      react: "A interface, otimizada pelo React Compiler.",
+      typescript: "Código com checagem de tipos no projeto inteiro.",
+      tailwind: "Estilos e layout responsivo.",
+      webApis:
+        "Canvas regrava imagens, Web Crypto gera senhas, e as APIs de File e Clipboard leem arquivos e copiam resultados.",
+      pdfLib: "Lê e regrava PDFs no Compressor de PDF.",
+      pdfmake: "Monta PDFs com texto selecionável no Markdown para PDF.",
+      marked:
+        "Transforma Markdown na pré-visualização, higienizada pelo DOMPurify.",
+      redis:
+        "Guarda links curtos, alertas de preço e contadores de requisições.",
+      webPush:
+        "Envia os alertas de preço como notificações do sistema, por meio de um service worker.",
+      telegram:
+        "Mensagens opcionais de alerta de preço por um bot do Telegram.",
+      yahoo: "Fonte das cotações e dos gráficos do mercado.",
+      actions: "Roda a conferência dos alertas de preço a cada 5 minutos.",
+      vitest: "Testes unitários da lógica das ferramentas e da API.",
+      biome: "Lint e formatação do código.",
+    },
+  },
+
   errors: {
     exact: {
+      "This PDF is password-protected and can't be compressed.":
+        "Este PDF é protegido por senha e não pode ser comprimido.",
+      "Enter the network name.": "Digite o nome da rede.",
+      "Enter the network password, or choose “No password”.":
+        "Digite a senha da rede ou escolha “Sem senha”.",
+      "This text is too long for a QR code. Shorten it or choose a lower error correction.":
+        "Este texto é longo demais para um QR code. Encurte-o ou escolha uma correção de erros menor.",
+      "This file could not be read as a PDF.":
+        "Este arquivo não pôde ser lido como PDF.",
       "Alert not found.": "Alerta não encontrado.",
       "Canvas is not supported in this browser.":
         "Este navegador não suporta canvas.",
@@ -505,6 +722,10 @@ export const pt: Dictionary = {
       [
         /^"(.*)" is not a Markdown file\.$/,
         (name) => `"${name}" não é um arquivo Markdown.`,
+      ],
+      [
+        /^"(.*)" is not a PDF file\.$/,
+        (name) => `"${name}" não é um arquivo PDF.`,
       ],
       [
         /^"(.*)" is not a PNG image\.$/,

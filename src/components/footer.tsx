@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useI18n } from "@/i18n/provider";
 
 export function Footer() {
@@ -11,7 +12,9 @@ export function Footer() {
         <p className="text-sm text-muted">
           © {new Date().getFullYear()} {t.site.name}
         </p>
-        <p className="text-sm text-muted">{t.site.footerNote}</p>
+        <Link href="/about" className="text-sm text-muted hover:text-ink">
+          {t.site.footerNote}
+        </Link>
       </div>
     </footer>
   );

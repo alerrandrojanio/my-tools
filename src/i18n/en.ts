@@ -15,6 +15,7 @@ export const en = {
     label: "Main",
     home: "Home",
     allTools: "All Tools",
+    about: "About",
     language: "Language",
     switchTo: "Mudar para português",
   },
@@ -85,6 +86,11 @@ export const en = {
       description:
         "Turn a .md file or pasted Markdown into a clean, selectable-text PDF, with a live preview.",
     },
+    "text-diff": {
+      name: "Text Compare",
+      description:
+        "Compare two texts side by side: what was removed shows in red, what was added in green.",
+    },
     "word-counter": {
       name: "Word Counter",
       description:
@@ -99,6 +105,11 @@ export const en = {
       name: "PNG to PDF Converter",
       description:
         "Turn one or more PNG images into a single, shareable PDF file.",
+    },
+    "pdf-compressor": {
+      name: "PDF Compressor",
+      description:
+        "Shrink a PDF by recompressing its images, without uploading it anywhere.",
     },
     "qr-code-generator": {
       name: "QR Code Generator",
@@ -407,6 +418,202 @@ export const en = {
     telegramWaiting: "Waiting for you to tap Start in Telegram…",
     telegramLinked: "Connected: your alerts also arrive in Telegram.",
     telegramUnlinked: "Telegram disconnected.",
+  },
+
+  qr: {
+    contentType: "Content",
+    text: "Text or link",
+    wifi: "Wi-Fi",
+    textPlaceholder: "https://example.com",
+    ssid: "Network name (SSID)",
+    password: "Password",
+    security: "Security",
+    wpa: "WPA/WPA2/WPA3",
+    wep: "WEP",
+    open: "No password",
+    hidden: "Hidden network",
+    wifiHint:
+      "Scanning the code offers to join the network, with no typing needed.",
+    level: "Error correction",
+    levels: {
+      L: "Low (7%)",
+      M: "Medium (15%)",
+      Q: "Quartile (25%)",
+      H: "High (30%)",
+    },
+    levelHint:
+      "Higher levels still scan when part of the code is scratched or covered by a logo, but make it denser.",
+    foreground: "Code color",
+    background: "Background",
+    lowContrast: "Low contrast: some phones may not read this code.",
+    inverted:
+      "Light code on a dark background: some readers can't scan inverted codes.",
+    pngSize: "PNG size",
+    preview: "Preview",
+    previewEmpty: "Type something to see the QR code.",
+    previewAlt: "QR code preview",
+    info: (version: number, modules: number, chars: number) =>
+      `Version ${version} · ${modules}×${modules} modules · ${chars} characters`,
+    downloadPng: "Download PNG",
+    downloadSvg: "Download SVG",
+    failed: "Could not create the image.",
+    note: "The code is generated in your browser and nothing is sent anywhere. It never expires: the content is stored in the image itself.",
+  },
+
+  color: {
+    picker: "Pick a color",
+    random: "Random color",
+    invalidHex: "Use 3 or 6 hex digits, like #7c3aed or #f80.",
+    invalidRgb: "Use three numbers from 0 to 255, like rgb(124, 58, 237).",
+    invalidHsl:
+      "Use a hue (0–360) and two percentages, like hsl(262, 83%, 58%).",
+    copyLabel: (format: string) => `Copy ${format}`,
+    contrastTitle: "Text contrast (WCAG)",
+    whiteText: "White text",
+    blackText: "Black text",
+    sample: "Sample text",
+    levelAAA: "AAA · excellent",
+    levelAA: "AA · good",
+    levelFail: "Too low for body text",
+    shades: "Shades",
+    shadeLabel: (hex: string) => `Use ${hex}`,
+    note: "Colors are converted in your browser. HSL is shown in whole numbers, so typing it back can shift an RGB channel by one.",
+  },
+
+  pdfCompress: {
+    file: "PDF file",
+    hint: "Choose a PDF (up to 100 MB). It is processed in your browser and never uploaded.",
+    images: "Images",
+    recompress: "Recompress",
+    recompressHint:
+      "Photos and scans are re-encoded as JPEG. Text, fonts and drawings stay sharp.",
+    keep: "Keep",
+    keepHint:
+      "Images are left untouched; only the file structure is cleaned up. Lossless, but usually saves less.",
+    quality: "JPEG quality",
+    qualityHint:
+      "Lower values make smaller files with more visible blur. 60–75 is a good balance.",
+    maxSize: "Maximum image size",
+    maxSizeHint:
+      "Longest side of each image, in pixels. 1600 is plenty for reading on screen; keep Full for printing.",
+    full: "Full",
+    compress: "Compress",
+    compressing: "Compressing…",
+    progress: (done: number, total: number) =>
+      `Processing image ${done} of ${total}…`,
+    original: "Original",
+    compressed: "Compressed",
+    smaller: (percent: string) => `${percent} smaller`,
+    imagesSummary: (recompressed: number, total: number) =>
+      total === 0
+        ? "No images found; only the file structure was compressed."
+        : `${recompressed} of ${total} images recompressed.`,
+    unchanged:
+      "This PDF is already compact: the result wasn't smaller, so the original is kept. Try a lower quality or a smaller maximum size.",
+    download: "Download PDF",
+    failed: "Could not compress this PDF.",
+    note: "Scanned documents and photo-heavy PDFs shrink the most; PDFs made of plain text shrink little. Password-protected PDFs are not supported.",
+  },
+
+  textDiff: {
+    original: "Original",
+    modified: "Modified",
+    placeholder: "Paste code or text, or open a file…",
+    openFile: "Open file",
+    openFileLabel: (side: string) => `Open a file as the ${side} text`,
+    fileTooLarge: (name: string) => `"${name}" is larger than 5 MB.`,
+    readFailed: (name: string) => `"${name}" could not be read as text.`,
+    lineCount: (n: number) => (n === 1 ? "1 line" : `${n} lines`),
+    compareBy: "Compare by",
+    chars: "Characters",
+    words: "Words",
+    lines: "Lines",
+    swap: "Swap texts",
+    options: "Options",
+    ignoreWhitespace: "Ignore whitespace",
+    ignoreWhitespaceHint:
+      "Indentation and the amount of spaces or tabs don't count as changes.",
+    wrap: "Wrap long lines",
+    syncScroll: "Scroll together",
+    previous: "Previous difference",
+    next: "Next difference",
+    position: (current: number, total: number) =>
+      `Difference ${current} of ${total}`,
+    total: (n: number) => (n === 1 ? "1 difference" : `${n} differences`),
+    removedCount: (n: number) => `${n} removed`,
+    addedCount: (n: number) => `${n} added`,
+    identical: "The texts are identical.",
+    empty: "Type or paste a text on each side to compare them.",
+    fellBack: (mode: string) =>
+      `Too many differences for that level of detail, so the texts were compared by ${mode}.`,
+    legendRemoved: "Removed from the original",
+    legendAdded: "Added in the modified text",
+    note: "The comparison runs in your browser; your texts and files are never sent anywhere. Changed lines are tinted and marked with − or + next to their number.",
+  },
+
+  about: {
+    title: "About",
+    description:
+      "Which tools run entirely in your browser, which ones use the server and what they store, and the technologies behind the site.",
+    intro:
+      "My Tools is a collection of small utilities. Most of them do all their work on your device, so your text and files never leave it. A few need the server, and this page says exactly what they send and what is kept.",
+    browserTitle: "Runs entirely in your browser",
+    browserIntro:
+      "Nothing you type or open in these tools is sent to the server or stored. The page only downloads the code it needs (and, for Markdown to PDF, its fonts).",
+    serverTitle: "Uses the server",
+    serverIntro:
+      "These tools need the server, either to fetch data from another service or to remember something for you.",
+    sends: "Sent to the server",
+    stores: "Stored",
+    server: {
+      "url-shortener": {
+        sends: "The long link you want to shorten.",
+        stores:
+          "The link and its short code, with no expiry, so the short link keeps working. Your IP address is used as a request counter that expires after one minute, to limit abuse.",
+      },
+      "market-quotes": {
+        sends:
+          "The symbols you look at and your searches. The server fetches prices from Yahoo Finance for you.",
+        stores:
+          "Nothing about you, apart from the same one-minute request counter tied to your IP address.",
+      },
+      alerts: {
+        name: "Price alerts (in Market Quotes)",
+        sends:
+          "The alerts you create and this browser's push-notification address.",
+        stores:
+          "Your alerts, the push address and a random ID for this browser, until you turn notifications off. If you connect Telegram, also your Telegram chat ID. A scheduled job checks prices every 5 minutes.",
+      },
+    },
+    localTitle: "Saved in your browser",
+    localIntro:
+      "A couple of preferences stay on your device and can be cleared with the browser's site data:",
+    localLanguage:
+      "Your language choice (a cookie named “lang”, kept for one year).",
+    localAlerts:
+      "The random ID of this browser for price alerts (local storage), only if you turn alerts on.",
+    techTitle: "Technologies",
+    techIntro:
+      "The site is built with open-source tools and standard web APIs.",
+    tech: {
+      next: "Pages, server rendering and the API routes.",
+      react: "The interface, optimized by the React Compiler.",
+      typescript: "Type-checked code across the whole project.",
+      tailwind: "Styling and the responsive layout.",
+      webApis:
+        "Canvas re-encodes images, Web Crypto generates passwords, and the File and Clipboard APIs read files and copy results.",
+      pdfLib: "Reads and rewrites PDFs in the PDF Compressor.",
+      pdfmake: "Builds PDFs with selectable text in Markdown to PDF.",
+      marked: "Turns Markdown into a preview, sanitized by DOMPurify.",
+      redis: "Stores short links, price alerts and request counters.",
+      webPush:
+        "Sends price alerts as system notifications, through a service worker.",
+      telegram: "Optional price-alert messages through a Telegram bot.",
+      yahoo: "Source of the market quotes and charts.",
+      actions: "Runs the price-alert check every 5 minutes.",
+      vitest: "Unit tests for the tools' logic and the API.",
+      biome: "Linting and code formatting.",
+    },
   },
 
   /**

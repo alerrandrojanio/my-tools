@@ -15,7 +15,9 @@ export type ToolIconName =
   | "link"
   | "id-card"
   | "download"
-  | "trending-up";
+  | "trending-up"
+  | "compress"
+  | "diff";
 
 /** Titles and descriptions live in the language files (src/i18n). */
 export interface ToolCategory {
@@ -26,9 +28,11 @@ export type ToolSlug =
   | "base64-converter"
   | "base64-to-file"
   | "markdown-to-pdf"
+  | "text-diff"
   | "word-counter"
   | "password-generator"
   | "png-to-pdf"
+  | "pdf-compressor"
   | "qr-code-generator"
   | "color-converter"
   | "json-formatter"
@@ -44,4 +48,6 @@ export interface Tool {
   href: string;
   /** Tools without a dedicated page yet are rendered as "Coming soon". */
   available: boolean;
+  /** "browser": nothing leaves the device; "server": uses the site's API (see /about). */
+  runsOn: "browser" | "server";
 }

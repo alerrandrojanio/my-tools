@@ -12,6 +12,7 @@ export function Navbar() {
   const NAV_LINKS = [
     { label: t.nav.home, href: "/" },
     { label: t.nav.allTools, href: "/#tools" },
+    { label: t.nav.about, href: "/about" },
   ] as const;
 
   // On the home page, links to "/" and "/#tools" scroll in place instead of navigating.

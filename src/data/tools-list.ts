@@ -20,6 +20,7 @@ export const tools: readonly Tool[] = [
     icon: "swap",
     href: "/tools/base64-converter",
     available: true,
+    runsOn: "browser",
   },
   {
     slug: "base64-to-file",
@@ -27,6 +28,7 @@ export const tools: readonly Tool[] = [
     icon: "download",
     href: "/tools/base64-to-file",
     available: true,
+    runsOn: "browser",
   },
   {
     slug: "markdown-to-pdf",
@@ -34,6 +36,15 @@ export const tools: readonly Tool[] = [
     icon: "file",
     href: "/tools/markdown-to-pdf",
     available: true,
+    runsOn: "browser",
+  },
+  {
+    slug: "text-diff",
+    categoryId: "text-and-data",
+    icon: "diff",
+    href: "/tools/text-diff",
+    available: true,
+    runsOn: "browser",
   },
   {
     slug: "word-counter",
@@ -41,6 +52,7 @@ export const tools: readonly Tool[] = [
     icon: "text-lines",
     href: "/tools/word-counter",
     available: true,
+    runsOn: "browser",
   },
   {
     slug: "password-generator",
@@ -48,6 +60,7 @@ export const tools: readonly Tool[] = [
     icon: "lock",
     href: "/tools/password-generator",
     available: true,
+    runsOn: "browser",
   },
 
   // Images and Colors
@@ -57,20 +70,31 @@ export const tools: readonly Tool[] = [
     icon: "file",
     href: "/tools/png-to-pdf",
     available: true,
+    runsOn: "browser",
+  },
+  {
+    slug: "pdf-compressor",
+    categoryId: "images-and-colors",
+    icon: "compress",
+    href: "/tools/pdf-compressor",
+    available: true,
+    runsOn: "browser",
   },
   {
     slug: "qr-code-generator",
     categoryId: "images-and-colors",
     icon: "qr-code",
     href: "/tools/qr-code-generator",
-    available: false,
+    available: true,
+    runsOn: "browser",
   },
   {
     slug: "color-converter",
     categoryId: "images-and-colors",
     icon: "droplet",
     href: "/tools/color-converter",
-    available: false,
+    available: true,
+    runsOn: "browser",
   },
 
   // Development and Data
@@ -80,6 +104,7 @@ export const tools: readonly Tool[] = [
     icon: "braces",
     href: "/tools/json-formatter",
     available: true,
+    runsOn: "browser",
   },
   {
     slug: "url-shortener",
@@ -87,6 +112,7 @@ export const tools: readonly Tool[] = [
     icon: "link",
     href: "/tools/url-shortener",
     available: true,
+    runsOn: "server",
   },
   {
     slug: "cpf-cnpj-generator",
@@ -94,6 +120,7 @@ export const tools: readonly Tool[] = [
     icon: "id-card",
     href: "/tools/cpf-cnpj-generator",
     available: true,
+    runsOn: "browser",
   },
 
   // Finance and Markets
@@ -103,6 +130,7 @@ export const tools: readonly Tool[] = [
     icon: "trending-up",
     href: "/tools/market-quotes",
     available: true,
+    runsOn: "server",
   },
 ];
 
