@@ -123,7 +123,7 @@ function SearchBox({ onSelect }: { onSelect: (symbol: string) => void }) {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-w-0 flex-col gap-2">
       <label htmlFor="market-search" className="text-[15px] font-semibold">
         {t.market.searchLabel}
       </label>
@@ -528,7 +528,7 @@ export function MarketQuotes() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="flex flex-col gap-5 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)]">
+      <section className="grid gap-5 rounded-2xl border border-line bg-surface p-[clamp(16px,3vw,28px)] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-8">
         <SearchBox onSelect={setSymbol} />
 
         <fieldset className="m-0 flex min-w-0 flex-wrap items-center gap-2 border-0 p-0">
@@ -559,7 +559,7 @@ export function MarketQuotes() {
         </fieldset>
       </section>
 
-      <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid items-stretch gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] 2xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <DetailPanel
           symbol={symbol}
           range={range}

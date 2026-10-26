@@ -7,7 +7,7 @@ export function generateMetadata() {
 
 export default function MarketQuotesPage() {
   return (
-    <ToolPage slug="market-quotes">
+    <ToolPage slug="market-quotes" wide>
       <MarketQuotes />
     </ToolPage>
   );
